@@ -377,7 +377,9 @@ export default function LayarDetailPesanan() {
           <View style={gaya.barisInformasi}>
             <Text style={gaya.labelInformasi}>Barber</Text>
 
-            <Text style={gaya.nilaiInformasi}>{pesanan.barber.nama}</Text>
+            <Text style={gaya.nilaiInformasi}>
+              {pesanan.barber?.nama ?? "Belum ditentukan"}
+            </Text>
           </View>
 
           <View style={gaya.barisInformasi}>

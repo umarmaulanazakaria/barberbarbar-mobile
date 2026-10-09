@@ -344,7 +344,7 @@ export default function LayarBeranda() {
                   </Text>
 
                   <Text style={gaya.detailOrder}>
-                    Barber: {pesanan.barber.nama}
+                    Barber: {pesanan.barber?.nama ?? "Belum ditentukan"}
                   </Text>
 
                   <View style={gaya.barisOrderBawah}>

@@ -393,7 +393,9 @@ export default function LayarPesanan() {
 
         <Text style={gaya.namaPelanggan}>{item.pelanggan.nama}</Text>
 
-        <Text style={gaya.informasi}>Barber: {item.barber.nama}</Text>
+        <Text style={gaya.informasi}>
+          Barber: {item.barber?.nama ?? "Belum ditentukan"}
+        </Text>
 
         <Text style={gaya.informasi}>Service: {ambilDaftarService(item)}</Text>
 

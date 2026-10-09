@@ -68,7 +68,7 @@ export type Pesanan = {
   nomorPesanan: string;
 
   pelangganId: number;
-  barberId: number;
+  barberId: number | null;
 
   status: StatusPesanan;
   statusPembayaran: StatusPembayaran;
@@ -85,7 +85,7 @@ export type Pesanan = {
   diperbaruiPada: string;
 
   pelanggan: Pelanggan;
-  barber: Barber;
+  barber: Barber | null;
 
   items: ItemPesanan[];
 
