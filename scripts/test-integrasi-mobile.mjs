@@ -77,7 +77,10 @@ try{
  const membership=await fetch(`${alamat}/customer/membership/requests`,{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${ct}`},body:"{}"});assert.equal(membership.status,201);
  assert.equal((await mod.ambilStatusMembership(p.id)).status,"PENDING_APPROVAL");
  pass("Status NON_MEMBER/PENDING_APPROVAL tersedia untuk STAFF; keputusan membership/refund ADMIN tetap ditolak STAFF");
- stop();socket.disconnect();assert.equal(socket.listeners("booking.changed").length,0);await mod.useSesiStore.getState().logout();assert.equal(await mod.ambilToken(),null);assert.equal(mod.useSesiStore.getState().token,null);
+ // Hentikan seluruh subscriber sebelum mengganti api.get untuk simulasi race.
+ // Callback refetch yang terlambat dapat mengambil Promise milik tes restore.
+ for(const f of lepas.splice(0).reverse())f();for(const s of sockets)s.removeAllListeners().disconnect();
+ assert.equal(socket.listeners("booking.changed").length,0);await mod.useSesiStore.getState().logout();assert.equal(await mod.ambilToken(),null);assert.equal(mod.useSesiStore.getState().token,null);
  const getAsli=mod.api.get;let selesaikan;await mod.simpanToken(token);mod.api.get=()=>new Promise(r=>{selesaikan=r;});const pemulihan=mod.useSesiStore.getState().muatSesi();await tunggu(()=>!!selesaikan);await mod.useSesiStore.getState().logout();selesaikan({data:{pengguna:{...operators[1]}}});await pemulihan;mod.api.get=getAsli;assert.equal(mod.useSesiStore.getState().token,null);
  await mod.simpanToken("invalid");mod.useSesiStore.setState({token:"invalid",pengguna:{id:operators[1].id,role:"STAFF"}});await assert.rejects(mod.ambilDaftarBooking());assert.equal(mod.useSesiStore.getState().token,null);assert.equal(await mod.ambilToken(),null);
  await mod.simpanToken("baru");assert.equal(await mod.hapusTokenJikaSama("lama"),false);assert.equal(await mod.ambilToken(),"baru");await mod.hapusToken();

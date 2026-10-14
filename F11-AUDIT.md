@@ -1,5 +1,18 @@
 # Integrasi Mobile ADMIN/STAFF
 
+## Verifikasi ulang integrasi customer, 15 Oktober 2026
+
+Regresi Mobile 10 kelompok PASS; cleanup membuktikan 22 model domain identik.
+Harness kini menghentikan semua subscriber/socket sebelum mengganti api.get
+untuk simulasi pemulihan sesi tertunda. Callback refetch sebelumnya dapat
+mengambil Promise simulasi tersebut dan membuat tes macet. Ini perbaikan
+harness saja; source alur operator dan file historis tidak diubah.
+Satu percobaan awal tumpang tindih dengan fixture backend tidak dipakai sebagai
+bukti snapshot. Fixture harness yang sempat macet dibersihkan berdasarkan
+identitas dummy acak terverifikasi dalam transaksi; seluruh record di luar
+fixture pada 22 model identik. Pengujian ulang dijalankan terpisah dan lulus.
+Pengujian UI Android tetap DEFERRED; hasil ini bukan bukti device E2E.
+
 14 Oktober 2026, branch feature/project5-integration pada kedua repository.
 **F11 PARSIAL untuk acceptance perangkat:** source/API/realtime terintegrasi dan
 tes lokal lulus; UI Android fisik/emulator serta klik lintas aplikasi DEFERRED.
