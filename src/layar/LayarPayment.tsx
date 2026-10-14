@@ -29,6 +29,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ambilPesanKesalahan } from "../layanan/api";
+import { usePenyegaranRealtime } from "../hooks/usePenyegaranRealtime";
+import { TombolBooking } from "../komponen/UiBooking";
 
 import {
   hapusItemPesanan,
@@ -162,6 +164,7 @@ export default function LayarPayment() {
     }
   }, [idPesanan]);
 
+  usePenyegaranRealtime(["pesanan","pembayaran","booking","katalog"],muatData);
   useFocusEffect(
     useCallback(() => {
       aturSedangMemuat(true);
@@ -177,7 +180,7 @@ export default function LayarPayment() {
   }, [nominalCepatTerpilih, pesanan?.total]);
 
   const jalankanAksiItem = async (aksi: () => Promise<unknown>) => {
-    if (sedangAksi) {
+    if (sedangAksi || pesanan?.booking) {
       return;
     }
 
@@ -257,12 +260,13 @@ export default function LayarPayment() {
 
   const paymentValid =
     pesanan !== null &&
+    !pesanan.booking &&
     pesanan.status === "COMPLETED" &&
     pesanan.statusPembayaran === "UNPAID" &&
     nominalDiterima >= pesanan.total;
 
   const prosesPayment = async () => {
-    if (!pesanan || !paymentValid || sedangAksi) {
+    if (!pesanan || pesanan.booking || !paymentValid || sedangAksi) {
       return;
     }
 
@@ -339,6 +343,7 @@ export default function LayarPayment() {
     });
   };
 
+  if (pesanan?.booking) return <SafeAreaView style={gaya.areaAman}><TombolKembali onPress={()=>navigasi.goBack()}/><TombolBooking judul="Kelola pelunasan melalui booking" aksi={()=>navigasi.replace("DetailBooking",{idBooking:pesanan.booking!.id})}/></SafeAreaView>;
   if (sedangMemuat) {
     return (
       <SafeAreaView style={gaya.areaAman}>

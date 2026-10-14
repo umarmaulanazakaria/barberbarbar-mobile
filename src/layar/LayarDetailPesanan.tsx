@@ -28,6 +28,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ambilPesanKesalahan } from "../layanan/api";
+import { usePenyegaranRealtime } from "../hooks/usePenyegaranRealtime";
+import { TombolBooking } from "../komponen/UiBooking";
+import PenentuanBarberWalkin from "../komponen/PenentuanBarberWalkin";
 
 import {
   hapusItemPesanan,
@@ -127,6 +130,7 @@ export default function LayarDetailPesanan() {
     }
   }, [idPesanan]);
 
+  usePenyegaranRealtime(["pesanan","pembayaran","booking","katalog"],muatData);
   useFocusEffect(
     useCallback(() => {
       aturSedangMemuat(true);
@@ -236,6 +240,7 @@ export default function LayarDetailPesanan() {
   };
 
   const tanganiMulaiService = () => {
+    if(!pesanan?.barberId){aturPesanKesalahan("Pilih barber aktif untuk mulai layanan.");return;}
     aturKonfigurasiModal({
       judul: "Mulai Service",
       pesan: "Ubah status Order menjadi sedang dilayani?",
@@ -307,6 +312,7 @@ export default function LayarDetailPesanan() {
   }
 
   const bolehEditItem =
+    !pesanan.booking &&
     pesanan.statusPembayaran === "UNPAID" &&
     (pesanan.status === "WAITING" ||
       pesanan.status === "IN_SERVICE" ||
@@ -570,11 +576,13 @@ export default function LayarDetailPesanan() {
           </View>
         </View>
 
-        {pesanan.status === "WAITING" ? (
+        {pesanan.booking && <TombolBooking judul="Kelola booking dan pelunasan" aksi={()=>navigasi.navigate("DetailBooking",{idBooking:pesanan.booking!.id})}/>}
+        {!pesanan.booking && pesanan.status === "WAITING" && pesanan.barberId===null && <PenentuanBarberWalkin idPesanan={pesanan.id} muat={muatData}/>}
+        {!pesanan.booking && pesanan.status === "WAITING" ? (
           <>
             <Pressable
               onPress={tanganiMulaiService}
-              disabled={sedangMengubahStatus || sedangAksiItem}
+              disabled={sedangMengubahStatus || sedangAksiItem || !pesanan.barberId}
               style={({ pressed }) => [
                 gaya.tombolUtama,
 
@@ -612,7 +620,7 @@ export default function LayarDetailPesanan() {
           </>
         ) : null}
 
-        {pesanan.status === "IN_SERVICE" ? (
+        {!pesanan.booking && pesanan.status === "IN_SERVICE" ? (
           <>
             <Pressable
               onPress={tanganiSelesaikanService}
@@ -654,7 +662,7 @@ export default function LayarDetailPesanan() {
           </>
         ) : null}
 
-        {pesanan.status === "COMPLETED" &&
+        {!pesanan.booking && pesanan.status === "COMPLETED" &&
         pesanan.statusPembayaran === "UNPAID" ? (
           <Pressable
             onPress={tanganiPayment}

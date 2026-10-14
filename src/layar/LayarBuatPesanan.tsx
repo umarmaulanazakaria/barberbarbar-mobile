@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback,useEffect, useMemo, useState } from "react";
+import { usePenyegaranRealtime } from "../hooks/usePenyegaranRealtime";
 
 import { Ionicons } from "@expo/vector-icons";
 
@@ -100,7 +101,7 @@ export default function LayarBuatPesanan() {
   const [konfigurasiModal, aturKonfigurasiModal] =
     useState<KonfigurasiModalAksi | null>(null);
 
-  const muatData = async () => {
+  const muatData = useCallback(async () => {
     try {
       aturSedangMemuat(true);
 
@@ -122,8 +123,8 @@ export default function LayarBuatPesanan() {
     } finally {
       aturSedangMemuat(false);
     }
-  };
-
+  }, []);
+  usePenyegaranRealtime(["pelanggan","membership","katalog"],muatData);
   useEffect(() => {
     void muatData();
   }, []);
@@ -192,7 +193,6 @@ export default function LayarBuatPesanan() {
 
   const formulirValid =
     idPelangganTerpilih !== null &&
-    idBarberTerpilih !== null &&
     layananTerpilih.length > 0;
 
   const ubahJumlahService = (idLayanan: number, perubahan: number) => {
@@ -250,7 +250,6 @@ export default function LayarBuatPesanan() {
     if (
       !formulirValid ||
       idPelangganTerpilih === null ||
-      idBarberTerpilih === null ||
       sedangMenyimpan
     ) {
       return;
@@ -264,7 +263,7 @@ export default function LayarBuatPesanan() {
       const hasil = await tambahPesanan({
         pelangganId: idPelangganTerpilih,
 
-        barberId: idBarberTerpilih,
+        ...(idBarberTerpilih === null ? {} : { barberId: idBarberTerpilih }),
 
         items: layananTerpilih.map((layanan) => ({
           layananId: layanan.id,
@@ -407,7 +406,7 @@ export default function LayarBuatPesanan() {
         </View>
 
         <View style={gaya.bagian}>
-          <Text style={gaya.judulBagian}>Barber</Text>
+          <Text style={gaya.judulBagian}>Barber (opsional; ditentukan saat mulai layanan)</Text>
 
           <Pressable
             onPress={() => aturDropdownBarberTerbuka(true)}

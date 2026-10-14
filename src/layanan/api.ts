@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { ambilToken, hapusToken } from "../penyimpanan/penyimpananSesi";
+import { ambilToken, hapusTokenJikaSama } from "../penyimpanan/penyimpananSesi";
 
 const alamatApi = process.env.EXPO_PUBLIC_API_URL;
 
@@ -8,7 +8,7 @@ if (!alamatApi) {
   throw new Error("EXPO_PUBLIC_API_URL belum diatur.");
 }
 
-type PenanganSesiTidakValid = () => void | Promise<void>;
+type PenanganSesiTidakValid = (token:string) => void | Promise<void>;
 
 let penanganSesiTidakValid: PenanganSesiTidakValid | null = null;
 
@@ -43,15 +43,17 @@ api.interceptors.response.use(
       const adalahLogin = url.includes("/auth/login");
 
       if (!adalahLogin) {
+        const tokenSekarang=await ambilToken();
+        if(error.config?.headers?.Authorization!==`Bearer ${tokenSekarang}`)return Promise.reject(error);
         try {
-          await hapusToken();
+          if(!tokenSekarang||!await hapusTokenJikaSama(tokenSekarang))return Promise.reject(error);
         } catch {
           // State aplikasi tetap
           // akan dibersihkan.
         }
 
         if (penanganSesiTidakValid) {
-          await penanganSesiTidakValid();
+          if(tokenSekarang)await penanganSesiTidakValid(tokenSekarang);
         }
       }
     }

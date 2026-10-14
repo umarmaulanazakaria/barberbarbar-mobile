@@ -17,6 +17,7 @@ export const ambilPelangganBerdasarkanId = async (idPelanggan: number) => {
 
   return data;
 };
+export const ambilStatusMembership=async(id:number)=>(await api.get<{status:"NON_MEMBER"|"PENDING_APPROVAL"|"ACTIVE"|"INACTIVE";diskonPersen:number}>(`/pelanggan/${id}/membership-status`)).data;
 
 export const tambahPelanggan = async (dataPelanggan: DataTambahPelanggan) => {
   const { data } = await api.post<Pelanggan>("/pelanggan", dataPelanggan);

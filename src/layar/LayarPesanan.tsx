@@ -28,6 +28,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ambilPesanKesalahan } from "../layanan/api";
+import { usePenyegaranRealtime } from "../hooks/usePenyegaranRealtime";
 
 import { ambilPesananAktif, ambilSemuaPesanan } from "../layanan/pesanan";
 
@@ -218,6 +219,7 @@ export default function LayarPesanan() {
     }
   }, [modeDaftar, menampilkanHariIni]);
 
+  usePenyegaranRealtime(["pesanan","booking","pembayaran","pelanggan"],muatPesanan);
   useFocusEffect(
     useCallback(() => {
       void muatPesanan();

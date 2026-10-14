@@ -7,12 +7,14 @@ import LayarBeranda from "../layar/LayarBeranda";
 import LayarProfil from "../layar/LayarProfil";
 import NavigasiPesanan, { type DaftarRutePesanan } from "./NavigasiPesanan";
 import NavigasiPelanggan from "./NavigasiPelanggan";
+import NavigasiBooking,{type DaftarRuteBooking} from "./NavigasiBooking";
 
 export type DaftarRuteTabUtama = {
   Beranda: undefined;
   Pesanan: NavigatorScreenParams<DaftarRutePesanan>;
   Pelanggan: undefined;
   Profile: undefined;
+  Booking: NavigatorScreenParams<DaftarRuteBooking> | undefined;
 };
 
 type NamaTab = keyof DaftarRuteTabUtama;
@@ -27,6 +29,7 @@ const ikonTab: Record<
     nonaktif: NamaIkon;
   }
 > = {
+  Booking: { aktif: "calendar", nonaktif: "calendar-outline" },
   Beranda: {
     aktif: "home",
     nonaktif: "home-outline",
@@ -85,6 +88,7 @@ export default function NavigasiTabUtama() {
       }}
     >
       <Tab.Screen name="Beranda" component={LayarBeranda} />
+      <Tab.Screen name="Booking" component={NavigasiBooking} />
 
       <Tab.Screen
         name="Pesanan"

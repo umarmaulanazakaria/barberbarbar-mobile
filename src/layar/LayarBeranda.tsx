@@ -19,6 +19,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ambilPesanKesalahan } from "../layanan/api";
 
 import { ambilDashboard } from "../layanan/dashboard";
+import RingkasanBookingBeranda from "../komponen/RingkasanBookingBeranda";
+import { usePenyegaranRealtime } from "../hooks/usePenyegaranRealtime";
 
 import type { Dashboard } from "../tipe/dashboard";
 
@@ -79,6 +81,7 @@ export default function LayarBeranda() {
     }
   }, []);
 
+  usePenyegaranRealtime(["beranda","membership","katalog","booking","pembayaran"],muatDashboard);
   useFocusEffect(
     useCallback(() => {
       void muatDashboard();
@@ -189,6 +192,7 @@ export default function LayarBeranda() {
           />
         }
       >
+        <RingkasanBookingBeranda/>
         <View style={gaya.kepala}>
           <Text style={gaya.sapaan}>Operasional Hari Ini</Text>
 

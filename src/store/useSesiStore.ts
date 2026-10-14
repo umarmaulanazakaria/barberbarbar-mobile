@@ -5,6 +5,7 @@ import { api, aturPenanganSesiTidakValid } from "../layanan/api";
 import {
   ambilToken,
   hapusToken,
+  hapusTokenJikaSama,
   simpanToken,
 } from "../penyimpanan/penyimpananSesi";
 
@@ -27,6 +28,7 @@ type SesiStore = {
 
   logout: () => Promise<void>;
 };
+let versiSesi=0;
 
 export const useSesiStore = create<SesiStore>((set) => ({
   pengguna: null,
@@ -36,6 +38,7 @@ export const useSesiStore = create<SesiStore>((set) => ({
   sudahMemuatSesi: false,
 
   login: async (email, kataSandi) => {
+    const versi=++versiSesi;
     set({
       sedangLogin: true,
     });
@@ -45,8 +48,10 @@ export const useSesiStore = create<SesiStore>((set) => ({
         email,
         password: kataSandi,
       });
+      if(versi!==versiSesi)return;
 
       await simpanToken(data.token);
+      if(versi!==versiSesi){await hapusTokenJikaSama(data.token);return;}
 
       set({
         pengguna: data.pengguna,
@@ -54,6 +59,7 @@ export const useSesiStore = create<SesiStore>((set) => ({
         token: data.token,
       });
     } finally {
+      if(versi===versiSesi)
       set({
         sedangLogin: false,
       });
@@ -61,12 +67,14 @@ export const useSesiStore = create<SesiStore>((set) => ({
   },
 
   muatSesi: async () => {
+    const versi=++versiSesi;
     set({
       sudahMemuatSesi: false,
     });
 
     try {
       const tokenTersimpan = await ambilToken();
+      if(versi!==versiSesi)return;
 
       if (!tokenTersimpan) {
         set({
@@ -78,6 +86,7 @@ export const useSesiStore = create<SesiStore>((set) => ({
       }
 
       const { data } = await api.get<ResponsProfil>("/auth/me");
+      if(versi!==versiSesi)return;
 
       set({
         pengguna: data.pengguna,
@@ -85,18 +94,21 @@ export const useSesiStore = create<SesiStore>((set) => ({
         token: tokenTersimpan,
       });
     } catch {
+      if(versi!==versiSesi)return;
       try {
         await hapusToken();
       } catch {
         // Session state tetap
         // dibersihkan.
       }
+      if(versi!==versiSesi)return;
 
       set({
         pengguna: null,
         token: null,
       });
     } finally {
+      if(versi===versiSesi)
       set({
         sudahMemuatSesi: true,
       });
@@ -104,6 +116,7 @@ export const useSesiStore = create<SesiStore>((set) => ({
   },
 
   logout: async () => {
+    versiSesi++;
     set({
       pengguna: null,
       token: null,
@@ -120,7 +133,9 @@ export const useSesiStore = create<SesiStore>((set) => ({
   },
 }));
 
-aturPenanganSesiTidakValid(() => {
+aturPenanganSesiTidakValid((token) => {
+  if(useSesiStore.getState().token!==token)return;
+  versiSesi++;
   useSesiStore.setState({
     pengguna: null,
     token: null,

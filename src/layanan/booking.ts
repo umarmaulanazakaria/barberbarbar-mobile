@@ -1,0 +1,12 @@
+import { api } from "./api";
+import type { Booking,RingkasanBooking,PermohonanMembership,RefundBooking } from "../tipe/booking";
+import type { DataPembayaran } from "../tipe/pesanan";
+export const ambilDaftarBooking=async()=>(await api.get<{data:Booking[]}>("/bookings")).data.data;
+export const ambilDetailBooking=async(id:number)=>(await api.get<{booking:Booking}>(`/bookings/${id}`)).data.booking;
+export const ambilPembayaranBooking=async(id:number)=>(await api.get<{ringkasan:RingkasanBooking}>(`/bookings/${id}/payments`)).data.ringkasan;
+export const tindakanBooking=(id:number,aksi:"confirm"|"reject"|"check-in"|"start"|"complete"|"barber-proposals",data:Record<string,unknown>={})=>api.post(`/bookings/${id}/${aksi}`,data);
+export const ubahLayananBooking=(id:number,items:{layananId:number;qty:number}[])=>api.put(`/bookings/${id}/services`,{items});
+export const pelunasanBooking=(id:number,data:DataPembayaran&{kunciIdempotensi:string})=>api.post(`/bookings/${id}/payments/settlement`,data);
+export const ambilPermohonanMembership=async()=>(await api.get<{data:PermohonanMembership[]}>("/membership-requests")).data.data;
+export const keputusanMembership=(id:number,aksi:"approve"|"reject")=>api.post(`/membership-requests/${id}/${aksi}`,{});
+export const ambilRefundAdmin=async()=>(await api.get<{data:RefundBooking[]}>("/refund-requests")).data.data;

@@ -64,6 +64,7 @@ export type RiwayatStatusPesanan = {
 };
 
 export type Pesanan = {
+  booking?: { id: number; nomorBooking: string } | null;
   id: number;
   nomorPesanan: string;
 
@@ -112,7 +113,7 @@ export type ItemTambahPesanan = {
 
 export type DataTambahPesanan = {
   pelangganId: number;
-  barberId: number;
+  barberId?: number | null;
 
   items: ItemTambahPesanan[];
 
