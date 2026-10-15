@@ -54,7 +54,7 @@ export default function LayarLogin() {
         </View>
 
         <View style={gaya.kartu}>
-          <Text style={gaya.judul}>Login Staff</Text>
+          <Text style={gaya.judul}>Masuk Staf</Text>
 
           <Text style={gaya.deskripsi}>
             Masuk menggunakan akun yang dibuat oleh Admin.
@@ -67,7 +67,7 @@ export default function LayarLogin() {
               style={gaya.input}
               value={email}
               onChangeText={aturEmail}
-              placeholder="staff@barber.com"
+              placeholder="nama@example.com"
               placeholderTextColor="#64748b"
               keyboardType="email-address"
               autoCapitalize="none"

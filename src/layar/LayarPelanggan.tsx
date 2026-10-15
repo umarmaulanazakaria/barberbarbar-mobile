@@ -18,6 +18,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ambilPesanKesalahan } from "../layanan/api";
+import { usePenyegaranRealtime } from "../hooks/usePenyegaranRealtime";
 
 import { ambilSemuaPelanggan } from "../layanan/pelanggan";
 
@@ -59,6 +60,7 @@ export default function LayarPelanggan() {
     }
   }, []);
 
+  usePenyegaranRealtime(["pelanggan","membership"],muatPelanggan);
   useFocusEffect(
     useCallback(() => {
       void muatPelanggan();
@@ -280,7 +282,7 @@ export default function LayarPelanggan() {
             <Text style={gaya.deskripsiDataKosong}>
               {kataPencarian
                 ? "Coba gunakan kata pencarian lain."
-                : "Tambahkan pelanggan pertama untuk mulai membuat Order."}
+                : "Tambahkan pelanggan pertama untuk mulai membuat pesanan."}
             </Text>
           </View>
         }

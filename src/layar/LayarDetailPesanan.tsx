@@ -1,3 +1,4 @@
+import { statusRamah } from '../layanan/teks';
 import { useCallback, useState } from "react";
 
 import {
@@ -28,6 +29,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ambilPesanKesalahan } from "../layanan/api";
+import { usePenyegaranRealtime } from "../hooks/usePenyegaranRealtime";
+import { TombolBooking } from "../komponen/UiBooking";
+import PenentuanBarberWalkin from "../komponen/PenentuanBarberWalkin";
 
 import {
   hapusItemPesanan,
@@ -67,22 +71,7 @@ const formatTanggal = (nilai: string) => {
   return new Date(nilai).toLocaleString("id-ID");
 };
 
-const ambilLabelStatus = (status: StatusPesanan) => {
-  if (status === "WAITING") {
-    return "Menunggu";
-  }
-
-  if (status === "IN_SERVICE") {
-    return "Dilayani";
-  }
-
-  if (status === "COMPLETED") {
-    return "Selesai";
-  }
-
-  return "Dibatalkan";
-};
-
+const ambilLabelStatus = (status: StatusPesanan) => statusRamah(status);
 export default function LayarDetailPesanan() {
   const rute = useRoute<RuteDetailPesanan>();
 
@@ -127,6 +116,7 @@ export default function LayarDetailPesanan() {
     }
   }, [idPesanan]);
 
+  usePenyegaranRealtime(["pesanan","pembayaran","booking","katalog"],muatData);
   useFocusEffect(
     useCallback(() => {
       aturSedangMemuat(true);
@@ -212,8 +202,8 @@ export default function LayarDetailPesanan() {
 
     if (pesanan.items.length <= 1) {
       aturKonfigurasiModal({
-        judul: "Service Tidak Dapat Dihapus",
-        pesan: "Order harus memiliki minimal satu Service.",
+        judul: "Layanan Tidak Dapat Dihapus",
+        pesan: "Pesanan harus memiliki minimal satu layanan.",
         teksTombolUtama: "OK",
         saatTombolUtama: () => {},
       });
@@ -222,8 +212,8 @@ export default function LayarDetailPesanan() {
     }
 
     aturKonfigurasiModal({
-      judul: "Hapus Service",
-      pesan: `Hapus ${namaLayanan} dari Order ini?`,
+      judul: "Hapus Layanan",
+      pesan: `Hapus ${namaLayanan} dari pesanan ini?`,
       teksTombolUtama: "Hapus",
       saatTombolUtama: () => {
         void jalankanAksiItem(async () => {
@@ -236,9 +226,10 @@ export default function LayarDetailPesanan() {
   };
 
   const tanganiMulaiService = () => {
+    if(!pesanan?.barberId){aturPesanKesalahan("Pilih barber aktif untuk mulai layanan.");return;}
     aturKonfigurasiModal({
-      judul: "Mulai Service",
-      pesan: "Ubah status Order menjadi sedang dilayani?",
+      judul: "Mulai Layanan",
+      pesan: "Mulai layanan untuk pesanan ini?",
       teksTombolUtama: "Mulai",
       saatTombolUtama: () => {
         void prosesUbahStatus("IN_SERVICE");
@@ -249,8 +240,8 @@ export default function LayarDetailPesanan() {
 
   const tanganiSelesaikanService = () => {
     aturKonfigurasiModal({
-      judul: "Selesaikan Service",
-      pesan: "Tandai seluruh Service pada Order ini sebagai selesai?",
+      judul: "Selesaikan Layanan",
+      pesan: "Tandai seluruh layanan pada pesanan ini sebagai selesai?",
       teksTombolUtama: "Selesaikan",
       saatTombolUtama: () => {
         void prosesUbahStatus("COMPLETED");
@@ -261,9 +252,9 @@ export default function LayarDetailPesanan() {
 
   const tanganiBatalkanOrder = () => {
     aturKonfigurasiModal({
-      judul: "Batalkan Order",
-      pesan: "Order yang dibatalkan tidak dapat dilanjutkan kembali.",
-      teksTombolUtama: "Batalkan Order",
+      judul: "Batalkan Pesanan",
+      pesan: "Pesanan yang dibatalkan tidak dapat dilanjutkan kembali.",
+      teksTombolUtama: "Batalkan Pesanan",
       saatTombolUtama: () => {
         void prosesUbahStatus("CANCELLED");
       },
@@ -284,7 +275,7 @@ export default function LayarDetailPesanan() {
         <View style={gaya.loading}>
           <ActivityIndicator size="large" color="#818cf8" />
 
-          <Text style={gaya.teksLoading}>Memuat Detail Order...</Text>
+          <Text style={gaya.teksLoading}>Memuat detail pesanan...</Text>
         </View>
       </SafeAreaView>
     );
@@ -295,11 +286,11 @@ export default function LayarDetailPesanan() {
       <SafeAreaView style={gaya.areaAman}>
         <View style={gaya.dataTidakDitemukan}>
           <Text style={gaya.judulDataTidakDitemukan}>
-            Order tidak ditemukan
+            Pesanan tidak ditemukan
           </Text>
 
           <Text style={gaya.deskripsiDataTidakDitemukan}>
-            {pesanKesalahan || "Data Order tidak tersedia."}
+            {pesanKesalahan || "Data pesanan belum tersedia."}
           </Text>
         </View>
       </SafeAreaView>
@@ -307,6 +298,7 @@ export default function LayarDetailPesanan() {
   }
 
   const bolehEditItem =
+    !pesanan.booking &&
     pesanan.statusPembayaran === "UNPAID" &&
     (pesanan.status === "WAITING" ||
       pesanan.status === "IN_SERVICE" ||
@@ -326,7 +318,7 @@ export default function LayarDetailPesanan() {
         <View style={gaya.kepala}>
           <Text style={gaya.nomorPesanan}>{pesanan.nomorPesanan}</Text>
 
-          <Text style={gaya.judul}>Detail Order</Text>
+          <Text style={gaya.judul}>Detail Pesanan</Text>
 
           <Text style={gaya.deskripsi}>
             {formatTanggal(pesanan.checkInTime)}
@@ -342,7 +334,7 @@ export default function LayarDetailPesanan() {
         <View style={gaya.kartuUtama}>
           <View style={gaya.barisStatus}>
             <View>
-              <Text style={gaya.labelKecil}>Status Order</Text>
+              <Text style={gaya.labelKecil}>Status Pesanan</Text>
 
               <Text style={gaya.nilaiStatus}>
                 {ambilLabelStatus(pesanan.status)}
@@ -350,7 +342,7 @@ export default function LayarDetailPesanan() {
             </View>
 
             <View style={gaya.statusPayment}>
-              <Text style={gaya.labelKecil}>Payment</Text>
+              <Text style={gaya.labelKecil}>Pembayaran</Text>
 
               <Text
                 style={[
@@ -361,7 +353,7 @@ export default function LayarDetailPesanan() {
                     : gaya.paymentUnpaid,
                 ]}
               >
-                {pesanan.statusPembayaran}
+                {statusRamah(pesanan.statusPembayaran)}
               </Text>
             </View>
           </View>
@@ -377,7 +369,9 @@ export default function LayarDetailPesanan() {
           <View style={gaya.barisInformasi}>
             <Text style={gaya.labelInformasi}>Barber</Text>
 
-            <Text style={gaya.nilaiInformasi}>{pesanan.barber.nama}</Text>
+            <Text style={gaya.nilaiInformasi}>
+              {pesanan.barber?.nama ?? "Belum ditentukan"}
+            </Text>
           </View>
 
           <View style={gaya.barisInformasi}>
@@ -389,7 +383,7 @@ export default function LayarDetailPesanan() {
 
         <View style={gaya.bagian}>
           <View style={gaya.kepalaBagian}>
-            <Text style={gaya.judulBagian}>Service</Text>
+            <Text style={gaya.judulBagian}>Layanan</Text>
 
             {bolehEditItem ? (
               <Text style={gaya.labelDapatDiubah}>Dapat diubah</Text>
@@ -463,7 +457,7 @@ export default function LayarDetailPesanan() {
                     </Pressable>
                   </View>
                 ) : (
-                  <Text style={gaya.qtyReadonly}>Qty: {item.qty}</Text>
+                  <Text style={gaya.qtyReadonly}>Jumlah: {item.qty}</Text>
                 )}
               </View>
             ))}
@@ -472,7 +466,7 @@ export default function LayarDetailPesanan() {
 
         {bolehEditItem && layananTersedia.length > 0 ? (
           <View style={gaya.bagian}>
-            <Text style={gaya.judulBagian}>Tambah Service</Text>
+            <Text style={gaya.judulBagian}>Tambah Layanan</Text>
 
             <View style={gaya.daftarLayanan}>
               {layananTersedia.map((layanan) => {
@@ -524,7 +518,7 @@ export default function LayarDetailPesanan() {
               ]}
             >
               <Text style={gaya.teksTombol}>
-                {sedangAksiItem ? "Memproses..." : "Tambah Service"}
+                {sedangAksiItem ? "Memproses..." : "Tambah Layanan"}
               </Text>
             </Pressable>
           </View>
@@ -568,11 +562,13 @@ export default function LayarDetailPesanan() {
           </View>
         </View>
 
-        {pesanan.status === "WAITING" ? (
+        {pesanan.booking && <TombolBooking judul="Kelola booking dan pelunasan" aksi={()=>navigasi.navigate("DetailBooking",{idBooking:pesanan.booking!.id})}/>}
+        {!pesanan.booking && pesanan.status === "WAITING" && pesanan.barberId===null && <PenentuanBarberWalkin idPesanan={pesanan.id} muat={muatData}/>}
+        {!pesanan.booking && pesanan.status === "WAITING" ? (
           <>
             <Pressable
               onPress={tanganiMulaiService}
-              disabled={sedangMengubahStatus || sedangAksiItem}
+              disabled={sedangMengubahStatus || sedangAksiItem || !pesanan.barberId}
               style={({ pressed }) => [
                 gaya.tombolUtama,
 
@@ -586,7 +582,7 @@ export default function LayarDetailPesanan() {
               ]}
             >
               <Text style={gaya.teksTombol}>
-                {sedangMengubahStatus ? "Memproses..." : "Mulai Service"}
+                {sedangMengubahStatus ? "Memproses..." : "Mulai Layanan"}
               </Text>
             </Pressable>
 
@@ -605,12 +601,12 @@ export default function LayarDetailPesanan() {
                   gaya.tombolDitekan,
               ]}
             >
-              <Text style={gaya.teksBatalkan}>Batalkan Order</Text>
+              <Text style={gaya.teksBatalkan}>Batalkan Pesanan</Text>
             </Pressable>
           </>
         ) : null}
 
-        {pesanan.status === "IN_SERVICE" ? (
+        {!pesanan.booking && pesanan.status === "IN_SERVICE" ? (
           <>
             <Pressable
               onPress={tanganiSelesaikanService}
@@ -628,7 +624,7 @@ export default function LayarDetailPesanan() {
               ]}
             >
               <Text style={gaya.teksTombol}>
-                {sedangMengubahStatus ? "Memproses..." : "Selesaikan Service"}
+                {sedangMengubahStatus ? "Memproses..." : "Selesaikan Layanan"}
               </Text>
             </Pressable>
 
@@ -647,12 +643,12 @@ export default function LayarDetailPesanan() {
                   gaya.tombolDitekan,
               ]}
             >
-              <Text style={gaya.teksBatalkan}>Batalkan Order</Text>
+              <Text style={gaya.teksBatalkan}>Batalkan Pesanan</Text>
             </Pressable>
           </>
         ) : null}
 
-        {pesanan.status === "COMPLETED" &&
+        {!pesanan.booking && pesanan.status === "COMPLETED" &&
         pesanan.statusPembayaran === "UNPAID" ? (
           <Pressable
             onPress={tanganiPayment}
@@ -665,13 +661,13 @@ export default function LayarDetailPesanan() {
               pressed && !sedangAksiItem && gaya.tombolDitekan,
             ]}
           >
-            <Text style={gaya.teksTombol}>Lanjut ke Payment</Text>
+            <Text style={gaya.teksTombol}>Lanjut ke Pembayaran</Text>
           </Pressable>
         ) : null}
 
         {pesanan.statusPembayaran === "PAID" ? (
           <View style={gaya.kartuSelesai}>
-            <Text style={gaya.judulSelesai}>Payment Selesai</Text>
+            <Text style={gaya.judulSelesai}>Pembayaran Berhasil</Text>
 
             <Text style={gaya.deskripsiSelesai}>
               Invoice: {pesanan.pembayaran?.nomorInvoice ?? "-"}
@@ -681,10 +677,10 @@ export default function LayarDetailPesanan() {
 
         {pesanan.status === "CANCELLED" ? (
           <View style={gaya.kartuDibatalkan}>
-            <Text style={gaya.judulDibatalkan}>Order Dibatalkan</Text>
+            <Text style={gaya.judulDibatalkan}>Pesanan Dibatalkan</Text>
 
             <Text style={gaya.deskripsiDibatalkan}>
-              Order ini tidak dapat dilanjutkan.
+              Pesanan ini tidak dapat dilanjutkan.
             </Text>
           </View>
         ) : null}

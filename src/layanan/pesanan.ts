@@ -37,11 +37,13 @@ export const tambahPesanan = async (dataPesanan: DataTambahPesanan) => {
 export const ubahStatusPesanan = async (
   idPesanan: number,
   status: StatusPesanan,
+  barberId?: number,
 ) => {
   const { data } = await api.patch<ResponsUbahStatusPesanan>(
     `/orders/${idPesanan}/status`,
     {
       status,
+      ...(barberId === undefined ? {} : { barberId }),
     },
   );
 

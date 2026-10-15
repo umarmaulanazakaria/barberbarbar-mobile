@@ -1,3 +1,4 @@
+import { statusRamah } from '../layanan/teks';
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -28,6 +29,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ambilPesanKesalahan } from "../layanan/api";
+import { usePenyegaranRealtime } from "../hooks/usePenyegaranRealtime";
 
 import { ambilPesananAktif, ambilSemuaPesanan } from "../layanan/pesanan";
 
@@ -73,22 +75,7 @@ const formatRupiah = (nilai: number) => {
   }).format(nilai);
 };
 
-const ambilLabelStatus = (status: StatusPesanan) => {
-  if (status === "WAITING") {
-    return "Menunggu";
-  }
-
-  if (status === "IN_SERVICE") {
-    return "Dilayani";
-  }
-
-  if (status === "COMPLETED") {
-    return "Selesai";
-  }
-
-  return "Dibatalkan";
-};
-
+const ambilLabelStatus = (status: StatusPesanan) => statusRamah(status);
 const ambilDaftarService = (pesanan: Pesanan) => {
   return pesanan.items
     .map((item) => `${item.namaLayanan} ×${item.qty}`)
@@ -218,6 +205,7 @@ export default function LayarPesanan() {
     }
   }, [modeDaftar, menampilkanHariIni]);
 
+  usePenyegaranRealtime(["pesanan","booking","pembayaran","pelanggan"],muatPesanan);
   useFocusEffect(
     useCallback(() => {
       void muatPesanan();
@@ -393,12 +381,14 @@ export default function LayarPesanan() {
 
         <Text style={gaya.namaPelanggan}>{item.pelanggan.nama}</Text>
 
-        <Text style={gaya.informasi}>Barber: {item.barber.nama}</Text>
+        <Text style={gaya.informasi}>
+          Barber: {item.barber?.nama ?? "Belum ditentukan"}
+        </Text>
 
-        <Text style={gaya.informasi}>Service: {ambilDaftarService(item)}</Text>
+        <Text style={gaya.informasi}>Layanan: {ambilDaftarService(item)}</Text>
 
         <View style={gaya.barisPembayaran}>
-          <Text style={gaya.labelPembayaran}>Payment</Text>
+          <Text style={gaya.labelPembayaran}>Pembayaran</Text>
 
           <Text
             style={[
@@ -453,7 +443,7 @@ export default function LayarPesanan() {
           <ActivityIndicator size="large" color="#818cf8" />
 
           <Text style={gaya.teksLoading}>
-            {menampilkanHistory ? "Memuat history Order..." : "Memuat Order..."}
+            {menampilkanHistory ? "Memuat riwayat pesanan..." : "Memuat pesanan..."}
           </Text>
         </View>
       </SafeAreaView>
@@ -464,7 +454,7 @@ export default function LayarPesanan() {
     return (
       <SafeAreaView style={gaya.areaAman}>
         <View style={gaya.errorHalaman}>
-          <Text style={gaya.judulError}>Order belum dapat dimuat</Text>
+          <Text style={gaya.judulError}>Pesanan belum dapat dimuat</Text>
 
           <Text style={gaya.deskripsiError}>{pesanKesalahan}</Text>
 
@@ -520,7 +510,7 @@ export default function LayarPesanan() {
                 </Text>
 
                 <Text style={gaya.deskripsiTanggalTerpilih}>
-                  History Order pada tanggal ini.
+                  Riwayat pesanan pada tanggal ini.
                 </Text>
               </View>
             </View>
@@ -550,10 +540,10 @@ export default function LayarPesanan() {
           ListHeaderComponent={
             <View>
               <View style={gaya.headerHistory}>
-                <Text style={gaya.judulHistory}>History Order</Text>
+                <Text style={gaya.judulHistory}>Riwayat Pesanan</Text>
 
                 <Text style={gaya.deskripsiHistory}>
-                  Riwayat Order berdasarkan tanggal yang sudah berlalu.
+                  Riwayat pesanan berdasarkan tanggal sebelumnya.
                 </Text>
               </View>
 
@@ -676,11 +666,10 @@ export default function LayarPesanan() {
                 color="#475569"
               />
 
-              <Text style={gaya.judulDataKosong}>Belum ada riwayat Order</Text>
+              <Text style={gaya.judulDataKosong}>Belum ada riwayat pesanan</Text>
 
               <Text style={gaya.deskripsiDataKosong}>
-                Tidak ada Order pada periode yang dipilih, atau Order masih
-                berada pada tanggal hari ini.
+                Tidak ada pesanan pada periode yang dipilih. Pesanan hari ini dapat dilihat pada daftar hari ini.
               </Text>
             </View>
           }
@@ -792,13 +781,13 @@ export default function LayarPesanan() {
             <View style={gaya.kepala}>
               <View style={gaya.informasiKepala}>
                 <Text style={gaya.judul}>
-                  {menampilkanHariIni ? "Order Hari Ini" : "Order Aktif"}
+                  {menampilkanHariIni ? "Pesanan Hari Ini" : "Pesanan Aktif"}
                 </Text>
 
                 <Text style={gaya.deskripsi}>
                   {menampilkanHariIni
-                    ? "Semua Order yang dibuat hari ini."
-                    : "Kelola Order aktif BARBER BARBAR."}
+                    ? "Semua pesanan yang dibuat hari ini."
+                    : "Kelola pesanan aktif BARBER BARBAR."}
                 </Text>
               </View>
 
@@ -811,7 +800,7 @@ export default function LayarPesanan() {
               >
                 <Text style={gaya.simbolTambah}>+</Text>
 
-                <Text style={gaya.teksBuatOrder}>Buat Order</Text>
+                <Text style={gaya.teksBuatOrder}>Buat Pesanan</Text>
               </Pressable>
             </View>
 
@@ -830,14 +819,14 @@ export default function LayarPesanan() {
           <View style={gaya.dataKosong}>
             <Text style={gaya.judulDataKosong}>
               {menampilkanHariIni
-                ? "Belum ada Order hari ini"
-                : "Belum ada Order aktif"}
+                ? "Belum ada pesanan hari ini"
+                : "Belum ada pesanan aktif"}
             </Text>
 
             <Text style={gaya.deskripsiDataKosong}>
               {menampilkanHariIni
-                ? "Order yang dibuat hari ini akan tampil di sini."
-                : "Buat Order baru untuk memulai transaksi."}
+                ? "Pesanan yang dibuat hari ini akan tampil di sini."
+                : "Buat pesanan baru untuk memulai transaksi."}
             </Text>
           </View>
         }

@@ -1,3 +1,4 @@
+import { statusRamah } from '../layanan/teks';
 import { useCallback, useState } from "react";
 
 import {
@@ -28,6 +29,8 @@ import ModalAksi from "../komponen/ModalAksi";
 import type { KonfigurasiModalAksi } from "../komponen/ModalAksi";
 
 import { ambilPesanKesalahan } from "../layanan/api";
+import { usePenyegaranRealtime } from "../hooks/usePenyegaranRealtime";
+import { ambilStatusMembership } from "../layanan/pelanggan";
 
 import {
   ambilPelangganBerdasarkanId,
@@ -61,6 +64,7 @@ export default function LayarDetailPelanggan() {
   const { idPelanggan } = rute.params;
 
   const [pelanggan, aturPelanggan] = useState<Pelanggan | null>(null);
+  const [statusMember,aturStatusMember]=useState("");
 
   const [sedangMemuat, aturSedangMemuat] = useState(true);
 
@@ -75,7 +79,8 @@ export default function LayarDetailPelanggan() {
     try {
       aturPesanKesalahan("");
 
-      const data = await ambilPelangganBerdasarkanId(idPelanggan);
+      const [data,status]=await Promise.all([ambilPelangganBerdasarkanId(idPelanggan),ambilStatusMembership(idPelanggan)]);
+      aturStatusMember(status.status);
 
       aturPelanggan(data);
     } catch (error) {
@@ -85,6 +90,7 @@ export default function LayarDetailPelanggan() {
     }
   }, [idPelanggan]);
 
+  usePenyegaranRealtime(["pelanggan","membership"],muatPelanggan);
   useFocusEffect(
     useCallback(() => {
       aturSedangMemuat(true);
@@ -221,7 +227,7 @@ export default function LayarDetailPelanggan() {
                 diblokir ? gaya.badgeDiblokir : gaya.badgeAktif,
               ]}
             >
-              <Text style={gaya.teksBadge}>{pelanggan.status}</Text>
+              <Text style={gaya.teksBadge}>{statusRamah(pelanggan.status)}</Text>
             </View>
 
             <View
@@ -279,6 +285,7 @@ export default function LayarDetailPelanggan() {
         <View style={gaya.bagian}>
           <Text style={gaya.judulBagian}>Membership</Text>
 
+          <Text style={gaya.nilaiMembership}>Status membership: {statusMember}</Text>
           {adalahMember && pelanggan.membership ? (
             <View style={gaya.kartuMembership}>
               <View style={gaya.kepalaMembership}>

@@ -64,11 +64,12 @@ export type RiwayatStatusPesanan = {
 };
 
 export type Pesanan = {
+  booking?: { id: number; nomorBooking: string } | null;
   id: number;
   nomorPesanan: string;
 
   pelangganId: number;
-  barberId: number;
+  barberId: number | null;
 
   status: StatusPesanan;
   statusPembayaran: StatusPembayaran;
@@ -85,7 +86,7 @@ export type Pesanan = {
   diperbaruiPada: string;
 
   pelanggan: Pelanggan;
-  barber: Barber;
+  barber: Barber | null;
 
   items: ItemPesanan[];
 
@@ -112,7 +113,7 @@ export type ItemTambahPesanan = {
 
 export type DataTambahPesanan = {
   pelangganId: number;
-  barberId: number;
+  barberId?: number | null;
 
   items: ItemTambahPesanan[];
 

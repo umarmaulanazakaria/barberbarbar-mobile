@@ -4,8 +4,10 @@ import LayarBuatPesanan from "../layar/LayarBuatPesanan";
 import LayarDetailPesanan from "../layar/LayarDetailPesanan";
 import LayarPayment from "../layar/LayarPayment";
 import LayarPesanan from "../layar/LayarPesanan";
+import LayarDetailBooking from "../layar/LayarDetailBooking";
 
 export type DaftarRutePesanan = {
+  DetailBooking: { idBooking: number };
   DaftarPesanan:
     | {
         mode?: "history" | "aktif" | "hariIni";
@@ -34,6 +36,7 @@ export default function NavigasiPesanan() {
       }}
     >
       <TumpukanPesanan.Screen name="DaftarPesanan" component={LayarPesanan} />
+      <TumpukanPesanan.Screen name="DetailBooking" component={LayarDetailBooking} />
 
       <TumpukanPesanan.Screen name="BuatPesanan" component={LayarBuatPesanan} />
 
