@@ -1,3 +1,5 @@
+> Dokumen historis dipindahkan dari `barberbarbar-mobile/F11-AUDIT.md`. Hasil dan path bukti mencatat waktu audit; panduan aktif ada di README utama dan laporan cleanup. Arsip privat kini berada di luar Stage 2.
+
 # Integrasi Mobile ADMIN/STAFF
 
 ## Verifikasi ulang integrasi customer, 15 Oktober 2026
