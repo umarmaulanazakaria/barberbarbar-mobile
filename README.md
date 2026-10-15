@@ -2,6 +2,13 @@
 
 Aplikasi Android untuk ADMIN dan STAFF barbershop, menggunakan backend pusat BARBER BARBAR. Aplikasi mengelola operasional harian tanpa backend atau database terpisah.
 
+## Tampilan Aplikasi
+
+Galeri Android Staff **belum tersedia**: ADB tidak menemukan perangkat/emulator saat pemeriksaan. Tidak ada placeholder atau screenshot Web yang diklaim sebagai UI native. Keberhasilan mobile menurut pengguna tetap dicatat sebagai USER-REPORTED, terpisah dari bukti gambar.
+
+[Panduan capture dan penamaan gambar](docs/screenshots/README.md). Setelah screenshot asli ditinjau, tampilkan dua atau tiga gambar per baris dengan path relatif. Jangan menautkan berkas yang belum ada.
+
+
 Project untuk **tugas kuliah, pembelajaran Fullstack, portofolio, dan demonstrasi lokal**; bukan aplikasi Production. Hosting berbayar bukan kebutuhan demo. Mobile berhasil menurut laporan pengguna (**USER-REPORTED**); bukti rinci UI native/checkout Android belum lengkap. Email nyata, refund historis dan advisory tetap dicatat jujur. Lihat [acceptance demo](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/DEMO-ACCEPTANCE.md).
 
 ## Teknologi dan fitur
@@ -69,7 +76,3 @@ Checkout Sandbox langsung dari Customer App, refund historis Rp2.000, pengiriman
 ## Demonstrasi dan portofolio
 
 [Menjalankan ekosistem](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/PANDUAN-JALANKAN-DEMO.md) | [Presentasi](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/PANDUAN-PRESENTASI.md) | [Naskah](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/NASKAH-DEMO.md) | [Review Git/PR](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/PORTFOLIO-RELEASE-REVIEW.md).
-
-### Screenshot perangkat
-
-Belum ada screenshot native terverifikasi dalam repository. [Panduan capture](docs/screenshots/README.md) menentukan layar yang diperlukan. Tidak memakai screenshot Web atau gambar fiktif sebagai pengganti Android.
