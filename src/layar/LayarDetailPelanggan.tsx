@@ -1,3 +1,4 @@
+import { statusRamah } from '../layanan/teks';
 import { useCallback, useState } from "react";
 
 import {
@@ -226,7 +227,7 @@ export default function LayarDetailPelanggan() {
                 diblokir ? gaya.badgeDiblokir : gaya.badgeAktif,
               ]}
             >
-              <Text style={gaya.teksBadge}>{pelanggan.status}</Text>
+              <Text style={gaya.teksBadge}>{statusRamah(pelanggan.status)}</Text>
             </View>
 
             <View

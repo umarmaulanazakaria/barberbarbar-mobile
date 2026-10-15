@@ -1,11 +1,12 @@
 import axios from "axios";
+import { pesanAman } from './teks';
 
 import { ambilToken, hapusTokenJikaSama } from "../penyimpanan/penyimpananSesi";
 
 const alamatApi = process.env.EXPO_PUBLIC_API_URL;
 
 if (!alamatApi) {
-  throw new Error("EXPO_PUBLIC_API_URL belum diatur.");
+  throw new Error("Aplikasi belum dapat terhubung. Silakan hubungi pengelola.");
 }
 
 type PenanganSesiTidakValid = (token:string) => void | Promise<void>;
@@ -90,8 +91,10 @@ export const ambilPesanKesalahan = (error: unknown) => {
     return "Sesi telah berakhir. Silakan masuk kembali.";
   }
 
+  if (error.response.status >= 500) return 'Terjadi kendala. Periksa status terbaru sebelum mencoba kembali.';
+
   if (memilikiPesan(error.response.data)) {
-    return error.response.data.pesan;
+    return pesanAman(error.response.data.pesan);
   }
 
   if (error.response.status === 400) {

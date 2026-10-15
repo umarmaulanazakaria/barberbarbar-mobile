@@ -279,9 +279,9 @@ export default function LayarBuatPesanan() {
       });
 
       aturKonfigurasiModal({
-        judul: "Order Berhasil Dibuat",
+        judul: "Pesanan Berhasil Dibuat",
         pesan: `${hasil.data.nomorPesanan} berhasil dibuat.`,
-        teksTombolUtama: "Lihat Order",
+        teksTombolUtama: "Lihat Pesanan",
         saatTombolUtama: () => {
           navigasi.replace("DetailPesanan", {
             idPesanan: hasil.data.id,
@@ -301,9 +301,9 @@ export default function LayarBuatPesanan() {
     }
 
     aturKonfigurasiModal({
-      judul: "Buat Order",
-      pesan: "Pastikan pelanggan, Barber, dan Service sudah benar.",
-      teksTombolUtama: "Buat Order",
+      judul: "Buat Pesanan",
+      pesan: "Pastikan pelanggan, barber, dan layanan sudah benar.",
+      teksTombolUtama: "Buat Pesanan",
       saatTombolUtama: () => {
         void prosesBuatOrder();
       },
@@ -317,7 +317,7 @@ export default function LayarBuatPesanan() {
         <View style={gaya.loading}>
           <ActivityIndicator size="large" color="#818cf8" />
 
-          <Text style={gaya.teksLoading}>Menyiapkan Order...</Text>
+          <Text style={gaya.teksLoading}>Menyiapkan pesanan...</Text>
         </View>
       </SafeAreaView>
     );
@@ -333,10 +333,10 @@ export default function LayarBuatPesanan() {
         <TombolKembali onPress={() => navigasi.goBack()} />
 
         <View style={gaya.kepala}>
-          <Text style={gaya.judul}>Buat Order</Text>
+          <Text style={gaya.judul}>Buat Pesanan</Text>
 
           <Text style={gaya.deskripsi}>
-            Pilih pelanggan, Barber, dan Service.
+            Pilih pelanggan, barber, dan layanan.
           </Text>
         </View>
 
@@ -445,7 +445,7 @@ export default function LayarBuatPesanan() {
         </View>
 
         <View style={gaya.bagian}>
-          <Text style={gaya.judulBagian}>Service</Text>
+          <Text style={gaya.judulBagian}>Layanan</Text>
 
           <View style={gaya.daftarPilihan}>
             {daftarLayanan.map((layanan) => {
@@ -505,7 +505,7 @@ export default function LayarBuatPesanan() {
           <TextInput
             value={catatan}
             onChangeText={aturCatatan}
-            placeholder="Catatan Order (opsional)"
+            placeholder="Catatan pesanan (opsional)"
             placeholderTextColor="#64748b"
             multiline
             maxLength={500}
@@ -574,7 +574,7 @@ export default function LayarBuatPesanan() {
           </View>
 
           <Text style={gaya.keteranganTotal}>
-            Total akhir mengikuti perhitungan saat Order dibuat.
+            Total akhir dihitung saat pesanan dibuat.
           </Text>
         </View>
 
@@ -590,7 +590,7 @@ export default function LayarBuatPesanan() {
           ]}
         >
           <Text style={gaya.teksTombol}>
-            {sedangMenyimpan ? "Membuat Order..." : "Buat Order"}
+            {sedangMenyimpan ? "Membuat pesanan..." : "Buat Pesanan"}
           </Text>
         </Pressable>
       </ScrollView>

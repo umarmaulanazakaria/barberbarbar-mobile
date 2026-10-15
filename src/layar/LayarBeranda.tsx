@@ -199,7 +199,7 @@ export default function LayarBeranda() {
           <Text style={gaya.judul}>BARBER BARBAR</Text>
 
           <Text style={gaya.deskripsi}>
-            Pantau aktivitas barbershop dan proses Order dari satu tempat.
+            Pantau aktivitas barbershop dan proses pesanan dalam satu tempat.
           </Text>
         </View>
 
@@ -228,7 +228,7 @@ export default function LayarBeranda() {
             <Text style={gaya.judulTombol}>Pesanan Baru</Text>
 
             <Text style={gaya.deskripsiTombol}>
-              Buat Order baru untuk pelanggan.
+              Buat pesanan baru untuk pelanggan.
             </Text>
           </View>
 
@@ -237,7 +237,7 @@ export default function LayarBeranda() {
 
         <View style={gaya.bagian}>
           <View style={gaya.kepalaBagian}>
-            <Text style={gaya.judulBagian}>Status Order</Text>
+            <Text style={gaya.judulBagian}>Status Pesanan</Text>
 
             <Pressable onPress={tanganiBukaPesananHariIni}>
               <Text style={gaya.lihatSemua}>Lihat Semua</Text>
@@ -268,7 +268,7 @@ export default function LayarBeranda() {
             <View style={gaya.kartuRingkasan}>
               <Text style={gaya.nilaiRingkasan}>{dashboard.paidToday}</Text>
 
-              <Text style={gaya.labelRingkasan}>Paid Hari Ini</Text>
+              <Text style={gaya.labelRingkasan}>Pembayaran Hari Ini</Text>
             </View>
           </View>
         </View>
@@ -300,14 +300,14 @@ export default function LayarBeranda() {
             <View style={gaya.kartuOverview}>
               <Text style={gaya.nilaiOverview}>{dashboard.layananAktif}</Text>
 
-              <Text style={gaya.labelOverview}>Service</Text>
+              <Text style={gaya.labelOverview}>Layanan</Text>
             </View>
           </View>
         </View>
 
         <View style={gaya.bagian}>
           <View style={gaya.kepalaBagian}>
-            <Text style={gaya.judulBagian}>Order Terbaru</Text>
+            <Text style={gaya.judulBagian}>Pesanan Terbaru</Text>
 
             <Pressable onPress={tanganiBukaPesananAktif}>
               <Text style={gaya.lihatSemua}>Lihat Semua</Text>
@@ -317,11 +317,11 @@ export default function LayarBeranda() {
           {pesananTerbaruBelumPaid.length === 0 ? (
             <View style={gaya.dataKosong}>
               <Text style={gaya.judulDataKosong}>
-                Tidak ada Order aktif terbaru
+                Belum ada pesanan aktif terbaru
               </Text>
 
               <Text style={gaya.deskripsiDataKosong}>
-                Order yang belum dibayar akan tampil di sini.
+                Pesanan yang belum dibayar akan tampil di sini.
               </Text>
             </View>
           ) : (

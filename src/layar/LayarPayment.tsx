@@ -231,8 +231,8 @@ export default function LayarPayment() {
 
   const tanganiHapusItem = (idItem: number, namaLayanan: string) => {
     aturKonfigurasiModal({
-      judul: "Hapus Service",
-      pesan: `Hapus ${namaLayanan} dari Order?`,
+      judul: "Hapus Layanan",
+      pesan: `Hapus ${namaLayanan} dari pesanan?`,
       teksTombolUtama: "Hapus",
       saatTombolUtama: () => {
         void jalankanAksiItem(async () => {
@@ -310,7 +310,7 @@ export default function LayarPayment() {
       void muatData();
 
       aturKonfigurasiModal({
-        judul: "Payment Berhasil",
+        judul: "Pembayaran Berhasil",
         pesan: `Invoice ${
           hasil.data.pembayaran.nomorInvoice
         }\nKembalian: ${formatRupiah(hasil.data.pembayaran.kembalian)}`,
@@ -333,7 +333,7 @@ export default function LayarPayment() {
     }
 
     aturKonfigurasiModal({
-      judul: "Konfirmasi Payment",
+      judul: "Konfirmasi Pembayaran",
       pesan: `Bayar ${pesanan?.nomorPesanan} dengan metode ${metode}?`,
       teksTombolUtama: "Bayar",
       saatTombolUtama: () => {
@@ -350,7 +350,7 @@ export default function LayarPayment() {
         <View style={gaya.loading}>
           <ActivityIndicator size="large" color="#818cf8" />
 
-          <Text style={gaya.teksLoading}>Menyiapkan Payment...</Text>
+          <Text style={gaya.teksLoading}>Menyiapkan pembayaran...</Text>
         </View>
       </SafeAreaView>
     );
@@ -361,11 +361,11 @@ export default function LayarPayment() {
       <SafeAreaView style={gaya.areaAman}>
         <View style={gaya.dataTidakDitemukan}>
           <Text style={gaya.judulDataTidakDitemukan}>
-            Order tidak ditemukan
+            Pesanan tidak ditemukan
           </Text>
 
           <Text style={gaya.deskripsiDataTidakDitemukan}>
-            {pesanKesalahan || "Data Order tidak tersedia."}
+            {pesanKesalahan || "Data pesanan belum tersedia."}
           </Text>
         </View>
       </SafeAreaView>
@@ -381,11 +381,11 @@ export default function LayarPayment() {
       <SafeAreaView style={gaya.areaAman}>
         <View style={gaya.dataTidakDitemukan}>
           <Text style={gaya.judulDataTidakDitemukan}>
-            Payment belum tersedia
+            Pembayaran belum tersedia
           </Text>
 
           <Text style={gaya.deskripsiDataTidakDitemukan}>
-            Service harus diselesaikan terlebih dahulu.
+            Layanan harus diselesaikan terlebih dahulu.
           </Text>
         </View>
       </SafeAreaView>
@@ -396,7 +396,7 @@ export default function LayarPayment() {
     return (
       <SafeAreaView style={gaya.areaAman}>
         <View style={gaya.dataTidakDitemukan}>
-          <Text style={gaya.judulPaymentSelesai}>Payment Sudah Selesai</Text>
+          <Text style={gaya.judulPaymentSelesai}>Pembayaran Berhasil</Text>
 
           <Text style={gaya.deskripsiDataTidakDitemukan}>
             Invoice: {pesanan.pembayaran?.nomorInvoice ?? "-"}
@@ -423,10 +423,10 @@ export default function LayarPayment() {
         <View style={gaya.kepala}>
           <Text style={gaya.nomorPesanan}>{pesanan.nomorPesanan}</Text>
 
-          <Text style={gaya.judul}>Payment</Text>
+          <Text style={gaya.judul}>Pembayaran</Text>
 
           <Text style={gaya.deskripsi}>
-            Periksa Service sebelum menyelesaikan pembayaran.
+            Periksa layanan sebelum menerima pembayaran.
           </Text>
         </View>
 
@@ -437,7 +437,7 @@ export default function LayarPayment() {
         ) : null}
 
         <View style={gaya.bagian}>
-          <Text style={gaya.judulBagian}>Service</Text>
+          <Text style={gaya.judulBagian}>Layanan</Text>
 
           <View style={gaya.daftarService}>
             {pesanan.items.map((item) => (
@@ -505,7 +505,7 @@ export default function LayarPayment() {
 
         {layananTersedia.length > 0 ? (
           <View style={gaya.bagian}>
-            <Text style={gaya.judulBagian}>Tambah Service</Text>
+            <Text style={gaya.judulBagian}>Tambah Layanan</Text>
 
             <View style={gaya.daftarLayanan}>
               {layananTersedia.map((layanan) => {
@@ -553,7 +553,7 @@ export default function LayarPayment() {
                   gaya.tombolDitekan,
               ]}
             >
-              <Text style={gaya.teksTombol}>Tambah Service</Text>
+              <Text style={gaya.teksTombol}>Tambah Layanan</Text>
             </Pressable>
           </View>
         ) : null}
@@ -597,7 +597,7 @@ export default function LayarPayment() {
         </View>
 
         <View style={gaya.bagian}>
-          <Text style={gaya.judulBagian}>Metode Payment</Text>
+          <Text style={gaya.judulBagian}>Metode Pembayaran</Text>
 
           <View style={gaya.areaMetode}>
             {daftarMetode.map((item) => {
@@ -720,7 +720,7 @@ export default function LayarPayment() {
         </View>
 
         <View style={gaya.bagian}>
-          <Text style={gaya.judulBagian}>Catatan Payment</Text>
+          <Text style={gaya.judulBagian}>Catatan Pembayaran</Text>
 
           <TextInput
             value={catatan}

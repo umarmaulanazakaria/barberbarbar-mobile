@@ -282,7 +282,7 @@ export default function LayarPelanggan() {
             <Text style={gaya.deskripsiDataKosong}>
               {kataPencarian
                 ? "Coba gunakan kata pencarian lain."
-                : "Tambahkan pelanggan pertama untuk mulai membuat Order."}
+                : "Tambahkan pelanggan pertama untuk mulai membuat pesanan."}
             </Text>
           </View>
         }
