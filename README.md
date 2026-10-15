@@ -1,8 +1,8 @@
-﻿# BARBER BARBAR Mobile Staff
+# BARBER BARBAR — Mobile Staff
 
 Aplikasi Android untuk ADMIN dan STAFF barbershop, menggunakan backend pusat BARBER BARBAR. Aplikasi mengelola operasional harian tanpa backend atau database terpisah.
 
-**Status: siap ditinjau dengan syarat; acceptance Android pada perangkat masih DEFERRED.** TypeScript, ekspor Hermes, dan integrasi lokal berbeda dari pengujian UI perangkat. Lihat [audit historis](docs/audit/F14-AUDIT.md) dan [audit workspace terbaru](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/WORKSPACE-CLEANUP-AUDIT.md).
+Project untuk **tugas kuliah, pembelajaran Fullstack, portofolio, dan demonstrasi lokal**; bukan aplikasi Production. Hosting berbayar bukan kebutuhan demo. Mobile berhasil menurut laporan pengguna (**USER-REPORTED**); bukti rinci UI native/checkout Android belum lengkap. Email nyata, refund historis dan advisory tetap dicatat jujur. Lihat [acceptance demo](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/DEMO-ACCEPTANCE.md).
 
 ## Teknologi dan fitur
 
@@ -65,3 +65,11 @@ Regresi backend dan browser lintas proyek tersedia di runner Project 3 dengan da
 - [Customer App](https://github.com/umarmaulanazakaria/barberbarbar-customer): pemesanan dan status milik customer.
 
 Checkout Sandbox langsung dari Customer App, refund historis Rp2.000, pengiriman recovery email, advisory dependency, dan sebagian keputusan bisnis belum tuntas. Ekosistem belum siap Production. Bukti dan penundaan dipertahankan dalam [audit](docs/audit/F14-AUDIT.md).
+
+## Demonstrasi dan portofolio
+
+[Menjalankan ekosistem](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/PANDUAN-JALANKAN-DEMO.md) | [Presentasi](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/PANDUAN-PRESENTASI.md) | [Naskah](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/NASKAH-DEMO.md) | [Review Git/PR](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/PORTFOLIO-RELEASE-REVIEW.md).
+
+### Screenshot perangkat
+
+Belum ada screenshot native terverifikasi dalam repository. [Panduan capture](docs/screenshots/README.md) menentukan layar yang diperlukan. Tidak memakai screenshot Web atau gambar fiktif sebagai pengganti Android.
