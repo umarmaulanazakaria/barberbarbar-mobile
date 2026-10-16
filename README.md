@@ -62,7 +62,7 @@ Regresi backend dan browser lintas proyek tersedia di runner Project 3 dengan da
 
 - [Web Management + Backend](https://github.com/umarmaulanazakaria/barberbarbar): autentikasi, booking, pembayaran, invoice, scheduler, dan event.
 - [Mobile Staff](https://github.com/umarmaulanazakaria/barberbarbar-mobile): operasional ADMIN/STAFF.
-- [Customer App](https://github.com/umarmaulanazakaria/barberbarbar-customer): pemesanan dan status milik customer.
+- [Customer Web](https://github.com/umarmaulanazakaria/barberbarbar-customer): React/Vite, booking tanpa akun dan tracking melalui sesi guest.
 
 Checkout Sandbox langsung dari Customer App, refund historis Rp2.000, pengiriman recovery email, advisory dependency, dan sebagian keputusan bisnis belum tuntas. Ekosistem belum siap Production. Bukti dan penundaan dipertahankan dalam [audit](docs/audit/F14-AUDIT.md).
 
