@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
@@ -19,12 +19,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ambilPesanKesalahan } from "../layanan/api";
 
 import { ambilDashboard } from "../layanan/dashboard";
-import RingkasanBookingBeranda from "../komponen/RingkasanBookingBeranda";
+import KartuOperasional from "../komponen/KartuOperasional";
+import { ambilOperasionalTerpadu, daftarAktif, type EntriOperasional } from "../layanan/operasionalTerpadu";
+import { useWaktuOperasional } from "../hooks/useWaktuOperasional";
 import { usePenyegaranRealtime } from "../hooks/usePenyegaranRealtime";
 
 import type { Dashboard } from "../tipe/dashboard";
-
-import type { StatusPesanan } from "../tipe/pesanan";
 
 import type { DaftarRuteTabUtama } from "../navigasi/NavigasiTabUtama";
 
@@ -38,22 +38,6 @@ const formatRupiah = (nilai: number) => {
   }).format(nilai);
 };
 
-const ambilLabelStatus = (status: StatusPesanan) => {
-  if (status === "WAITING") {
-    return "Menunggu";
-  }
-
-  if (status === "IN_SERVICE") {
-    return "Dilayani";
-  }
-
-  if (status === "COMPLETED") {
-    return "Selesai";
-  }
-
-  return "Dibatalkan";
-};
-
 export default function LayarBeranda() {
   const navigasi = useNavigation<NavigasiBeranda>();
 
@@ -65,26 +49,31 @@ export default function LayarBeranda() {
 
   const [pesanKesalahan, aturPesanKesalahan] = useState("");
 
+  const [daftar, aturDaftar] = useState<EntriOperasional[]>([]);
+  const urutan = useRef(0);
+
   const muatDashboard = useCallback(async () => {
+    const nomor = ++urutan.current;
     try {
       aturPesanKesalahan("");
 
-      const data = await ambilDashboard();
-
+      const [data, entri] = await Promise.all([ambilDashboard(), ambilOperasionalTerpadu()]);
+      if (nomor !== urutan.current) return;
       aturDashboard(data);
+      aturDaftar(entri);
     } catch (error) {
-      aturPesanKesalahan(ambilPesanKesalahan(error));
+      if (nomor === urutan.current) aturPesanKesalahan(ambilPesanKesalahan(error));
     } finally {
-      aturSedangMemuat(false);
-
-      aturSedangRefresh(false);
+      if (nomor === urutan.current) { aturSedangMemuat(false); aturSedangRefresh(false); }
     }
   }, []);
 
+  const sekarang = useWaktuOperasional(muatDashboard);
   usePenyegaranRealtime(["beranda","membership","katalog","booking","pembayaran"],muatDashboard);
   useFocusEffect(
     useCallback(() => {
       void muatDashboard();
+      return () => { urutan.current++; };
     }, [muatDashboard]),
   );
 
@@ -126,14 +115,9 @@ export default function LayarBeranda() {
     });
   };
 
-  const tanganiDetailPesanan = (idPesanan: number) => {
-    navigasi.navigate("Pesanan", {
-      screen: "DetailPesanan",
-
-      params: {
-        idPesanan,
-      },
-    });
+  const tanganiDetail = (entri: EntriOperasional) => {
+    if (entri.booking) navigasi.navigate("Booking", {screen:"DetailBooking",params:{idBooking:entri.booking.id}});
+    else if (entri.pesanan) navigasi.navigate("Pesanan", {screen:"DetailPesanan",params:{idPesanan:entri.pesanan.id}});
   };
 
   if (sedangMemuat && !dashboard) {
@@ -174,10 +158,8 @@ export default function LayarBeranda() {
     return null;
   }
 
-  const pesananTerbaruBelumPaid = dashboard.pesananTerbaru.filter(
-    (pesanan) =>
-      pesanan.statusPembayaran === "UNPAID" && pesanan.status !== "CANCELLED",
-  );
+  const pesananAktif = daftarAktif(daftar, sekarang);
+  const pesananTerbaruBelumPaid = pesananAktif.slice(0, 7);
 
   return (
     <SafeAreaView style={gaya.areaAman}>
@@ -192,7 +174,6 @@ export default function LayarBeranda() {
           />
         }
       >
-        <RingkasanBookingBeranda/>
         <View style={gaya.kepala}>
           <Text style={gaya.sapaan}>Operasional Hari Ini</Text>
 
@@ -321,47 +302,15 @@ export default function LayarBeranda() {
               </Text>
 
               <Text style={gaya.deskripsiDataKosong}>
-                Pesanan yang belum dibayar akan tampil di sini.
+                Booking dan walk-in yang membutuhkan tindak lanjut akan tampil di sini.
               </Text>
             </View>
           ) : (
             <View style={gaya.daftarOrder}>
-              {pesananTerbaruBelumPaid.map((pesanan) => (
-                <Pressable
-                  key={pesanan.id}
-                  onPress={() => tanganiDetailPesanan(pesanan.id)}
-                  style={({ pressed }) => [
-                    gaya.kartuOrder,
-                    pressed && gaya.tombolDitekan,
-                  ]}
-                >
-                  <View style={gaya.barisOrderAtas}>
-                    <Text style={gaya.nomorOrder}>{pesanan.nomorPesanan}</Text>
-
-                    <Text style={gaya.statusOrder}>
-                      {ambilLabelStatus(pesanan.status)}
-                    </Text>
-                  </View>
-
-                  <Text style={gaya.namaPelanggan}>
-                    {pesanan.pelanggan.nama}
-                  </Text>
-
-                  <Text style={gaya.detailOrder}>
-                    Barber: {pesanan.barber?.nama ?? "Belum ditentukan"}
-                  </Text>
-
-                  <View style={gaya.barisOrderBawah}>
-                    <Text style={[gaya.statusPayment, gaya.paymentUnpaid]}>
-                      {pesanan.statusPembayaran}
-                    </Text>
-
-                    <Text style={gaya.totalOrder}>
-                      {formatRupiah(pesanan.total)}
-                    </Text>
-                  </View>
-                </Pressable>
+              {pesananTerbaruBelumPaid.map((entri) => (
+                <KartuOperasional key={entri.kunci} entri={entri} sekarang={sekarang} buka={() => tanganiDetail(entri)}/>
               ))}
+              {pesananAktif.length > 7 && <Text style={gaya.detailOrder}>Menampilkan 7 dari {pesananAktif.length} entri aktif. Buka Lihat Semua untuk seluruh daftar.</Text>}
             </View>
           )}
         </View>

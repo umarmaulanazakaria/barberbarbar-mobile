@@ -1,5 +1,4 @@
-import { statusRamah } from '../layanan/teks';
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Ionicons } from "@expo/vector-icons";
 
@@ -31,9 +30,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ambilPesanKesalahan } from "../layanan/api";
 import { usePenyegaranRealtime } from "../hooks/usePenyegaranRealtime";
 
-import { ambilPesananAktif, ambilSemuaPesanan } from "../layanan/pesanan";
-
-import type { Pesanan, StatusPesanan } from "../tipe/pesanan";
+import { ambilOperasionalTerpadu, daftarAktif, hariOperasional, padaHariIni, riwayatOperasional, ruteOperasional, type EntriOperasional } from "../layanan/operasionalTerpadu";
+import { useWaktuOperasional } from "../hooks/useWaktuOperasional";
+import KartuOperasional from "../komponen/KartuOperasional";
 
 import type { DaftarRutePesanan } from "../navigasi/NavigasiPesanan";
 
@@ -49,7 +48,7 @@ type KelompokHistory = {
   hari: number;
   bulan: number;
   tahun: number;
-  pesanan: Pesanan[];
+  pesanan: EntriOperasional[];
 };
 
 const namaBulan = [
@@ -67,42 +66,7 @@ const namaBulan = [
   "Desember",
 ];
 
-const formatRupiah = (nilai: number) => {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(nilai);
-};
-
-const ambilLabelStatus = (status: StatusPesanan) => statusRamah(status);
-const ambilDaftarService = (pesanan: Pesanan) => {
-  return pesanan.items
-    .map((item) => `${item.namaLayanan} ×${item.qty}`)
-    .join(", ");
-};
-
 const duaDigit = (nilai: number) => nilai.toString().padStart(2, "0");
-
-const buatKunciTanggal = (tanggalIso: string) => {
-  const tanggal = new Date(tanggalIso);
-
-  return `${tanggal.getFullYear()}-${duaDigit(
-    tanggal.getMonth() + 1,
-  )}-${duaDigit(tanggal.getDate())}`;
-};
-
-const buatKunciHariIni = () => {
-  const hariIni = new Date();
-
-  return `${hariIni.getFullYear()}-${duaDigit(
-    hariIni.getMonth() + 1,
-  )}-${duaDigit(hariIni.getDate())}`;
-};
-
-const apakahHariIni = (tanggalIso: string) => {
-  return buatKunciTanggal(tanggalIso) === buatKunciHariIni();
-};
 
 const formatTanggalPanjang = (hari: number, bulan: number, tahun: number) => {
   return `${hari} ${namaBulan[bulan - 1]} ${tahun}`;
@@ -156,7 +120,8 @@ export default function LayarPesanan() {
   const menampilkanHistory = modeDaftar === "history";
   const menampilkanHariIni = modeDaftar === "hariIni";
 
-  const [daftarPesanan, aturDaftarPesanan] = useState<Pesanan[]>([]);
+  const urutan = useRef(0);
+  const [daftarPesanan, aturDaftarPesanan] = useState<EntriOperasional[]>([]);
 
   const [sedangMemuat, aturSedangMemuat] = useState(true);
 
@@ -168,7 +133,7 @@ export default function LayarPesanan() {
     string | null
   >(null);
 
-  const [tahunTerpilih, aturTahunTerpilih] = useState(new Date().getFullYear());
+  const [tahunTerpilih, aturTahunTerpilih] = useState(hariOperasional().tahun);
 
   const [bulanTerpilih, aturBulanTerpilih] = useState<number | null>(null);
 
@@ -184,45 +149,37 @@ export default function LayarPesanan() {
   }, [modeDaftar]);
 
   const muatPesanan = useCallback(async () => {
+    const nomor = ++urutan.current;
     try {
       aturPesanKesalahan("");
 
-      const data =
-        modeDaftar === "aktif"
-          ? await ambilPesananAktif()
-          : await ambilSemuaPesanan();
-
-      const dataDitampilkan = menampilkanHariIni
-        ? data.filter((pesanan) => apakahHariIni(pesanan.dibuatPada))
-        : data;
-
-      aturDaftarPesanan(dataDitampilkan);
+      const data = await ambilOperasionalTerpadu();
+      if (nomor === urutan.current) aturDaftarPesanan(data);
     } catch (error) {
-      aturPesanKesalahan(ambilPesanKesalahan(error));
+      if (nomor === urutan.current) aturPesanKesalahan(ambilPesanKesalahan(error));
     } finally {
-      aturSedangMemuat(false);
-      aturSedangRefresh(false);
+      if (nomor === urutan.current) { aturSedangMemuat(false); aturSedangRefresh(false); }
     }
-  }, [modeDaftar, menampilkanHariIni]);
+  }, [modeDaftar]);
+
+  const sekarang = useWaktuOperasional(muatPesanan);
+  const dataDitampilkan = menampilkanHariIni
+    ? daftarPesanan.filter(e => !!e.pesanan && padaHariIni(e.pesanan.dibuatPada, sekarang))
+    : daftarAktif(daftarPesanan, sekarang);
 
   usePenyegaranRealtime(["pesanan","booking","pembayaran","pelanggan"],muatPesanan);
   useFocusEffect(
     useCallback(() => {
       void muatPesanan();
+      return () => { urutan.current++; };
     }, [muatPesanan]),
   );
 
   const kelompokHistory = useMemo(() => {
     const kelompok = new Map<string, KelompokHistory>();
-    const hariIni = buatKunciHariIni();
-
-    daftarPesanan.forEach((pesanan) => {
-      const tanggal = new Date(pesanan.dibuatPada);
-      const kunci = buatKunciTanggal(pesanan.dibuatPada);
-
-      if (kunci === hariIni) {
-        return;
-      }
+    riwayatOperasional(daftarPesanan, sekarang).forEach((pesanan) => {
+      const tanggal = hariOperasional(Date.parse(pesanan.jadwal));
+      const kunci = tanggal.kunci;
 
       const dataKelompok = kelompok.get(kunci);
 
@@ -233,9 +190,9 @@ export default function LayarPesanan() {
 
       kelompok.set(kunci, {
         kunci,
-        hari: tanggal.getDate(),
-        bulan: tanggal.getMonth() + 1,
-        tahun: tanggal.getFullYear(),
+        hari: tanggal.hari,
+        bulan: tanggal.bulan,
+        tahun: tanggal.tahun,
         pesanan: [pesanan],
       });
     });
@@ -246,16 +203,16 @@ export default function LayarPesanan() {
 
         pesanan: [...item.pesanan].sort(
           (a, b) =>
-            new Date(b.dibuatPada).getTime() - new Date(a.dibuatPada).getTime(),
+            Date.parse(b.jadwal) - Date.parse(a.jadwal),
         ),
       }))
       .sort((a, b) => b.kunci.localeCompare(a.kunci));
-  }, [daftarPesanan]);
+  }, [daftarPesanan, sekarang]);
 
   const daftarTahun = useMemo(() => {
     const tahun = new Set<number>();
 
-    tahun.add(new Date().getFullYear());
+    tahun.add(hariOperasional().tahun);
 
     kelompokHistory.forEach((item) => {
       tahun.add(item.tahun);
@@ -270,7 +227,7 @@ export default function LayarPesanan() {
     }
 
     if (!daftarTahun.includes(tahunTerpilih)) {
-      aturTahunTerpilih(daftarTahun[0] ?? new Date().getFullYear());
+      aturTahunTerpilih(daftarTahun[0] ?? hariOperasional().tahun);
     }
   }, [daftarTahun, menampilkanHistory, tahunTerpilih]);
 
@@ -336,83 +293,23 @@ export default function LayarPesanan() {
     navigasi.navigate("BuatPesanan");
   };
 
-  const tanganiPilihPesanan = (pesanan: Pesanan) => {
-    navigasi.navigate("DetailPesanan", {
-      idPesanan: pesanan.id,
-    });
+  const tanganiPilihPesanan = (entri: EntriOperasional) => {
+    const ruteDetail = ruteOperasional(entri);
+    if (ruteDetail.screen === "DetailBooking") navigasi.navigate(ruteDetail.screen, ruteDetail.params);
+    else navigasi.navigate(ruteDetail.screen, ruteDetail.params);
   };
 
   const tanganiResetFilter = () => {
-    aturTahunTerpilih(new Date().getFullYear());
+    aturTahunTerpilih(hariOperasional().tahun);
 
     aturBulanTerpilih(null);
 
     aturFilterTanggal("");
   };
 
-  const renderPesanan = ({ item }: { item: Pesanan }) => {
-    return (
-      <Pressable
-        onPress={() => tanganiPilihPesanan(item)}
-        style={({ pressed }) => [
-          gaya.kartuPesanan,
-          pressed && gaya.kartuDitekan,
-        ]}
-      >
-        <View style={gaya.barisAtas}>
-          <Text style={gaya.nomorPesanan}>{item.nomorPesanan}</Text>
-
-          <View
-            style={[
-              gaya.badgeStatus,
-
-              item.status === "WAITING" && gaya.badgeMenunggu,
-
-              item.status === "IN_SERVICE" && gaya.badgeDilayani,
-
-              item.status === "COMPLETED" && gaya.badgeSelesai,
-
-              item.status === "CANCELLED" && gaya.badgeDibatalkan,
-            ]}
-          >
-            <Text style={gaya.teksBadge}>{ambilLabelStatus(item.status)}</Text>
-          </View>
-        </View>
-
-        <Text style={gaya.namaPelanggan}>{item.pelanggan.nama}</Text>
-
-        <Text style={gaya.informasi}>
-          Barber: {item.barber?.nama ?? "Belum ditentukan"}
-        </Text>
-
-        <Text style={gaya.informasi}>Layanan: {ambilDaftarService(item)}</Text>
-
-        <View style={gaya.barisPembayaran}>
-          <Text style={gaya.labelPembayaran}>Pembayaran</Text>
-
-          <Text
-            style={[
-              gaya.statusPembayaran,
-
-              item.statusPembayaran === "PAID"
-                ? gaya.statusPaid
-                : gaya.statusUnpaid,
-            ]}
-          >
-            {item.statusPembayaran}
-          </Text>
-        </View>
-
-        <View style={gaya.pemisah} />
-
-        <View style={gaya.barisTotal}>
-          <Text style={gaya.labelTotal}>Total</Text>
-
-          <Text style={gaya.nilaiTotal}>{formatRupiah(item.total)}</Text>
-        </View>
-      </Pressable>
-    );
-  };
+  const renderPesanan = ({ item }: { item: EntriOperasional }) => (
+    <KartuOperasional entri={item} sekarang={sekarang} buka={() => tanganiPilihPesanan(item)}/>
+  );
 
   const renderKartuTanggal = ({ item }: { item: KelompokHistory }) => {
     return (
@@ -477,7 +374,7 @@ export default function LayarPesanan() {
       <SafeAreaView style={gaya.areaAman}>
         <FlatList
           data={kelompokTerpilih.pesanan}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.kunci}
           renderItem={renderPesanan}
           contentContainerStyle={gaya.kontenDaftar}
           refreshControl={
@@ -764,8 +661,8 @@ export default function LayarPesanan() {
   return (
     <SafeAreaView style={gaya.areaAman}>
       <FlatList
-        data={daftarPesanan}
-        keyExtractor={(item) => item.id.toString()}
+        data={dataDitampilkan}
+        keyExtractor={(item) => item.kunci}
         renderItem={renderPesanan}
         contentContainerStyle={gaya.kontenDaftar}
         refreshControl={
@@ -787,7 +684,7 @@ export default function LayarPesanan() {
                 <Text style={gaya.deskripsi}>
                   {menampilkanHariIni
                     ? "Semua pesanan yang dibuat hari ini."
-                    : "Kelola pesanan aktif BARBER BARBAR."}
+                    : "Seluruh booking dan walk-in yang membutuhkan tindak lanjut."}
                 </Text>
               </View>
 
