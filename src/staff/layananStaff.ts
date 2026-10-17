@@ -1,0 +1,46 @@
+import * as SecureStore from "expo-secure-store";
+import { api } from "../layanan/api";
+import type { Barber } from "../tipe/barber";
+import type { Layanan } from "../tipe/layanan";
+import type { Booking, RingkasanBooking } from "../tipe/booking";
+export type JenisStaff = "BOOKING" | "WALK_IN";
+export type EntriStaff = { jenis: JenisStaff; id: number; pesananId: number | null; nomor: string; pelanggan: string; barber: string | null; jadwal: string; status: string; statusPembayaran: string; layanan: string[]; member: boolean };
+export type DaftarStaff = { data: EntriStaff[]; total: number; halaman: number; batas: number; serverTime: string; hariIni: string; metrik?: { operasionalHariIni: { menunggu: number; berlangsung: number; selesai: number } } };
+export type ItemStaff = { layananId: number; namaLayanan: string; harga: number; qty: number; subtotal: number };
+export type PesananStaff = { id: number; nomorPesanan: string; status: string; statusPembayaran: string; checkInTime: string; total: number; subtotal: number; diskon: number; barberId: number | null; barber: Barber | null; pelanggan: { nama: string } | null; profilPelanggan: { nama: string } | null; membershipBerbayarId: number | null; snapshotManfaat: unknown; items: ItemStaff[] };
+export type BookingStaff = Booking & { memberBebasDp: boolean; identitasMemberPada: string | null; barberDisetujuiId: number | null; barberFinalId: number | null };
+export type UangBookingStaff = RingkasanBooking & { bebasDp: boolean; syaratDpTerpenuhi: boolean; nominalDp: number };
+export type MemberStaff = { id: number; nomorMember: string | null; nama: string; nomorTelepon: string | null; status: string; berlakuSampai: string | null };
+export type ProfilStaff = { id: number; nama: string; nomorTelepon: string; membership: { id: number; memberCode: string | null } | null };
+export type MemberBookingStaff = { bebasDp: boolean; diverifikasiPada: string | null; nomorMember: string | null; namaMember: string | null; nomorTeleponMember: string | null };
+export type TransaksiStaff = { id: number; metode: string; status: string; nominal: number; urlQris: string | null; kedaluwarsaPada: string | null; statusProvider: string | null };
+export type DokumenStaff = { id: string; nomor: string; referensi: string; pelanggan: string; total: number; subtotal: number; diskon: number; dibayar: number; balance: number; status: string; keadaan: string; final: boolean; items: { nama: string; qty: number; nominal: number }[]; struk: { id: string; nomor: string; metode: string; nominal: number; diterima: number | null; kembalian: number; tanggal: string }[] };
+export const daftarStaff = async (params: Record<string, string | number>) => (await api.get<DaftarStaff>("/management/orders", { params })).data;
+export const katalogStaff = async () => { const [b, l] = await Promise.all([api.get<Barber[]>("/barbers"), api.get<Layanan[]>("/layanan")]); return { barber: b.data.filter(v => v.aktif), layanan: l.data.filter(v => v.aktif) }; };
+export const bookingStaff = async (id: number) => (await api.get<{ booking: BookingStaff }>(`/bookings/${id}`)).data.booking;
+export const pesananStaff = async (id: number) => (await api.get<PesananStaff>(`/orders/${id}`)).data;
+export const uangStaff = async (id: number) => (await api.get<{ ringkasan: UangBookingStaff }>(`/bookings/${id}/payments`)).data.ringkasan;
+export const memberBookingStaff = async (id: number) => (await api.get<MemberBookingStaff>(`/management/membership-benefits/booking/${id}`)).data;
+export const profilStaff = async (cari: string) => (await api.get<ProfilStaff[]>("/management/customers/options", { params: { cari, batas: 20 } })).data;
+export const cekMemberStaff = async (nomor: string) => {
+  const list = (await api.get<{ data: MemberStaff[] }>("/management/memberships", { params: { cari: nomor.trim(), halaman: 1 } })).data.data;
+  const m = list.find(m => m.nomorMember === nomor.trim().toUpperCase());
+  if (!m) throw Error("Nomor Member tidak ditemukan.");
+  const member = (await api.get<MemberStaff>(`/management/memberships/${m.id}`)).data;
+  if (member.status !== "AKTIF" || !member.nomorTelepon) throw Error("Membership belum aktif atau tidak dapat digunakan. Periksa bersama Admin.");
+  const profil = (await profilStaff(member.nomorTelepon)).find(p => p.membership?.id === member.id);
+  if (!profil) throw Error("Profil aktif Member tidak tersedia. Hubungi Admin.");
+  return { member, profil };
+};
+export const hpStaff = (s: string) => s.replace(/[\s().+\-]/g, "").replace(/^62/, "0");
+export const identitasCocok = (m: MemberStaff, nama: string, hp: string) => m.nama.trim().toLocaleLowerCase() === nama.trim().toLocaleLowerCase() && hpStaff(m.nomorTelepon ?? "") === hpStaff(hp);
+export const pesanStaff = (e: unknown) => { if (e instanceof Error && !("isAxiosError" in e)) return e.message; return null; };
+export const rupiahStaff = (n: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
+export const jamStaff = (s: string) => new Intl.DateTimeFormat("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(s));
+export const tanggalStaff = (s: string) => new Intl.DateTimeFormat("id-ID", { timeZone: "Asia/Jakarta", dateStyle: "long" }).format(new Date(s));
+export const statusStaff: Record<string, string> = { WAITING: "Menunggu", AWAITING_DP: "Menunggu DP", PENDING_CONFIRMATION: "Konfirmasi", CONFIRMED: "Dikonfirmasi", CHECKED_IN: "Check-in", IN_SERVICE: "Dilayani", COMPLETED: "Selesai", CANCELLED: "Dibatalkan", REJECTED: "Ditolak", NO_SHOW: "Tidak hadir", PAID: "Lunas", UNPAID: "Belum lunas", MEMBER_CONFIRMED: "Member tanpa DP", DP_PAID: "DP terverifikasi", PARTIALLY_PAID: "Belum lunas", OVERDUE: "Belum lunas", FREE: "Manfaat Member" };
+export function kunciStaff() { const b = new Uint8Array(16); for (let i = 0; i < b.length; i++) b[i] = Math.floor(Math.random() * 256); b[6] = (b[6]! & 15) | 64; b[8] = (b[8]! & 63) | 128; const h = Array.from(b, n => n.toString(16).padStart(2, "0")).join(""); return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`; }
+// Kunci ini hanya untuk idempotensi, bukan token akses atau credential.
+export const simpanPermintaanStaff = (key: string, body: unknown) => SecureStore.setItemAsync(key, JSON.stringify(body));
+export const bacaPermintaanStaff = async <T>(key: string) => { const v = await SecureStore.getItemAsync(key); return v ? JSON.parse(v) as T : null; };
+export const hapusPermintaanStaff = (key: string) => SecureStore.deleteItemAsync(key);

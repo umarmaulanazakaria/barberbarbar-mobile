@@ -6,7 +6,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
-import LayarLogin from "../layar/LayarLogin";
+import LayarLogin from "../staff/LayarLoginStaff";
 
 import { useSesiStore } from "../store/useSesiStore";
 
