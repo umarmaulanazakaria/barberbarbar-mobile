@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Modal, Pressable, ScrollView, SectionList, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Modal, Platform, Pressable, ScrollView, SectionList, StyleSheet, Text, TextInput, View } from "react-native";
+import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -18,6 +19,7 @@ export default function RiwayatMinimalStaff() {
   const nav = useNavigation<NativeStackNavigationProp<RuteStaff>>(), insets = useSafeAreaInsets();
   const [tab, aturTab] = useState("SEMUA"), [filter, aturFilter] = useState<FilterRiwayat>(filterRiwayatAwal), [draft, aturDraft] = useState<FilterRiwayat>(filterRiwayatAwal), [sheet, aturSheet] = useState(false), [cari, aturCari] = useState(""), [kata, aturKata] = useState("");
   const daftar = useRef<SectionList<ArsipStaff>>(null);
+  const [pilihTanggal, aturPilihTanggal] = useState<"mulai" | "selesai" | null>(null);
   const { data, memuat, tambahan, error, muat, kunci } = useRiwayatMinimalStaff({ periode: filter.periode, jenis: filter.jenis, status: filter.status, kelompok: tab, pembayaran: filter.pembayaran, urutan: filter.urutan, cari: kata, ...(filter.periode === "RENTANG" ? { mulai: filter.mulai, selesai: filter.selesai } : {}) });
   useEffect(() => { const t = setTimeout(() => aturKata(cari.trim()), 300); return () => clearTimeout(t); }, [cari]);
   useEffect(() => { daftar.current?.getScrollResponder()?.scrollTo({ y: 0, animated: false }); }, [kunci]);
@@ -27,9 +29,15 @@ export default function RiwayatMinimalStaff() {
     return [...kelompok].map(([key, data]) => ({ key, title: key === "TANPA_WAKTU" ? "Waktu penutupan tidak tersedia" : `Ditutup ${tanggalStaff(`${key}T12:00:00+07:00`)}`, data }));
   }, [data]);
   const labelPeriode = periode.find(([v]) => v === filter.periode)?.[1] ?? filter.periode, mencari = cari.trim() !== kata;
-  const ubah = (kolom: keyof FilterRiwayat, nilai: string) => aturDraft(v => ({ ...v, [kolom]: nilai }));
+  const ubah = (kolom: keyof FilterRiwayat, nilai: string) => { if (kolom === "periode") aturPilihTanggal(null); aturDraft(v => ({ ...v, [kolom]: nilai })); };
   const rentangSah = draft.periode !== "RENTANG" || tanggalArsipValid(draft.mulai) && tanggalArsipValid(draft.selesai) && draft.mulai <= draft.selesai;
-  const buka = () => { aturDraft({ ...filter }); aturSheet(true); };
+  const buka = () => { aturDraft({ ...filter }); aturPilihTanggal(null); aturSheet(true); };
+  const nilaiTanggal = (kolom: "mulai" | "selesai") => new Date(`${tanggalArsipValid(draft[kolom]) ? draft[kolom] : data?.hariIni ?? hariPenutupan(new Date().toISOString())}T12:00:00+07:00`);
+  const bukaTanggal = (kolom: "mulai" | "selesai") => {
+    if (Platform.OS === "android") {
+      DateTimePickerAndroid.open({ value: nilaiTanggal(kolom), mode: "date", display: "default", timeZoneName: "Asia/Jakarta", minimumDate: new Date("0001-01-01T12:00:00+07:00"), maximumDate: new Date("9998-12-31T12:00:00+07:00"), onValueChange: (_event, tanggal) => ubah(kolom, hariPenutupan(tanggal.toISOString())) });
+    } else aturPilihTanggal(kolom);
+  };
   return <SafeAreaView edges={["top", "left", "right"]} style={s.aman}>
     <View style={s.header}><Text style={s.brand}>BARBER BARBAR · STAFF</Text><Text style={s.judul}>Riwayat</Text><Text style={s.subtitle}>Arsip pesanan · berdasarkan waktu penutupan · WIB</Text></View>
     <SectionList ref={daftar} sections={mencari ? [] : sections} keyExtractor={d => `${d.jenis}:${d.id}`} stickySectionHeadersEnabled={false} keyboardShouldPersistTaps="handled" contentContainerStyle={s.isi} refreshing={memuat && !tambahan && !!data} onRefresh={() => void muat()}
@@ -48,7 +56,10 @@ export default function RiwayatMinimalStaff() {
       ListFooterComponent={data && data.halaman < data.totalHalaman && !mencari ? <Pressable accessibilityRole="button" disabled={memuat} onPress={() => void muat(true)} style={[s.muatLainnya, memuat && s.disabled]}>{tambahan ? <ActivityIndicator size="small" color={ungu}/> : <Text style={s.link}>Muat lainnya</Text>}</Pressable> : null}/>
     <Modal transparent visible={sheet} animationType="slide" onRequestClose={() => aturSheet(false)}><View style={s.overlay}><Pressable style={StyleSheet.absoluteFill} accessibilityLabel="Tutup filter" onPress={() => aturSheet(false)}/><View accessibilityViewIsModal style={[s.sheet, { paddingBottom: Math.max(insets.bottom, 12) }]}><View style={s.handle}/><View style={s.sheetJudul}><Text style={s.sheetTitle}>Filter Riwayat</Text><Pressable accessibilityRole="button" accessibilityLabel="Tutup filter" onPress={() => aturSheet(false)} hitSlop={10}><Ionicons name="close" size={20} color="#7c8599"/></Pressable></View><ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={s.sheetIsi}>
       <Text style={s.label}>Periode penutupan</Text><Chip nilai={draft.periode} opsi={periode} ubah={v => ubah("periode", v)}/>
-      {draft.periode === "RENTANG" && <View style={s.rentang}>{(["mulai", "selesai"] as const).map(k => <View key={k} style={s.kolomTanggal}><Text style={s.catatan}>{k === "mulai" ? "Dari" : "Sampai"}</Text><TextInput accessibilityLabel={k === "mulai" ? "Tanggal mulai" : "Tanggal selesai"} placeholder="YYYY-MM-DD" value={draft[k]} maxLength={10} onChangeText={v => ubah(k, v)} style={s.inputTanggal}/></View>)}</View>}
+      {draft.periode === "RENTANG" && <>
+        <View style={s.rentang}>{(["mulai", "selesai"] as const).map(k => <View key={k} style={s.kolomTanggal}><Text style={s.catatan}>{k === "mulai" ? "Dari" : "Sampai"}</Text><Pressable accessibilityRole="button" accessibilityLabel={`${k === "mulai" ? "Tanggal mulai" : "Tanggal selesai"}: ${draft[k] || "belum dipilih"}`} onPress={() => bukaTanggal(k)} style={[s.inputTanggal, { flexDirection: "row", alignItems: "center", gap: 6 }]}><Ionicons name="calendar-outline" size={13} color={ungu}/><Text style={{ flex: 1, color: "#18233b", fontSize: 11 }} numberOfLines={1}>{draft[k] || "Pilih tanggal"}</Text></Pressable></View>)}</View>
+        {Platform.OS === "ios" && pilihTanggal && <View><DateTimePicker value={nilaiTanggal(pilihTanggal)} mode="date" display="inline" timeZoneName="Asia/Jakarta" themeVariant="light" minimumDate={new Date("0001-01-01T12:00:00+07:00")} maximumDate={new Date("9998-12-31T12:00:00+07:00")} onValueChange={(_event, tanggal) => ubah(pilihTanggal, hariPenutupan(tanggal.toISOString()))}/><Pressable accessibilityRole="button" onPress={() => aturPilihTanggal(null)} hitSlop={8}><Text style={s.link}>Selesai memilih tanggal</Text></Pressable></View>}
+      </>}
       {!rentangSah && <Text style={s.errorTeks}>Pilih rentang tanggal yang valid.</Text>}
       <Text style={s.label}>Jenis pesanan</Text><Chip nilai={draft.jenis} opsi={[["SEMUA", "Semua"], ["BOOKING", "Booking"], ["WALK_IN", "Walk-in"]]} ubah={v => ubah("jenis", v)}/>
       <Text style={s.label}>Status akhir</Text><Chip nilai={draft.status} opsi={[["SEMUA", "Semua"], ["COMPLETED", "Selesai"], ["CANCELLED", "Dibatalkan"], ["EXPIRED", "Kedaluwarsa"]]} ubah={v => ubah("status", v)}/>
