@@ -6,9 +6,9 @@ Aplikasi operasional ADMIN/STAFF berbasis Expo SDK 57, React Native 0.86 dan Rea
 
 Tiga aplikasi memakai satu API Express/Prisma dan PostgreSQL yang sama. Admin memakai desain **Admin Minimal**, Customer memakai **mobile-first**, Staff memakai **Minimal V3**. Harga, slot, kelayakan Member, keputusan operasional dan pembayaran ditetapkan backend. Socket.IO hanya memberi sinyal refetch REST.
 
-- [Admin Web dan Backend](https://github.com/umarmaulanazakaria/barberbarbar/tree/feature/project5-integration)
-- [React Native Staff](https://github.com/umarmaulanazakaria/barberbarbar-mobile/tree/feature/project5-integration)
-- [Customer Web](https://github.com/umarmaulanazakaria/barberbarbar-customer/tree/feat/project5-react-web-mobile-first)
+- [Admin Web dan Backend](https://github.com/umarmaulanazakaria/barberbarbar/tree/main)
+- [React Native Staff](https://github.com/umarmaulanazakaria/barberbarbar-mobile/tree/main)
+- [Customer Web](https://github.com/umarmaulanazakaria/barberbarbar-customer/tree/main)
 
 ## Fitur dan desain Minimal V3
 
@@ -64,10 +64,14 @@ Audit terbaru: TypeScript dan export Android/Hermes snapshot commit lulus. Ini b
 
 ## Batas verifikasi
 
-Audit 18 Oktober 2026 memisahkan snapshot commit dari WIP lokal. TypeScript / build bukan bukti seluruh alur UI atau pembayaran provider. Lihat [laporan audit pusat](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/audit/AUDIT-SISTEM-TERKINI.md). Pengujian integrasi memakai PostgreSQL fixture dan provider mock; bukan settlement Sandbox baru. Perangkat Android/iOS dan printer fisik belum diuji dalam audit ini. Advisory dependency masih terbuka. **Belum siap dinyatakan rilis penuh; bukan Production.**
+Audit 18 Oktober 2026 memisahkan snapshot commit dari WIP lokal. TypeScript / build bukan bukti seluruh alur UI atau pembayaran provider. Lihat [laporan audit pusat](https://github.com/umarmaulanazakaria/barberbarbar/blob/main/docs/audit/AUDIT-SISTEM-TERKINI.md). Pengujian integrasi memakai PostgreSQL fixture dan provider mock; bukan settlement Sandbox baru. Perangkat Android/iOS dan printer fisik belum diuji dalam audit ini. Advisory dependency masih terbuka. **Belum siap dinyatakan rilis penuh; bukan Production.**
 
 [Catatan operasional dan desain](docs/OPERASIONAL-TERKINI.md). Dokumentasi lama di docs dipertahankan sebagai arsip, bukan bukti verifikasi UI terbaru.
 
 ## Pembaruan keamanan dependency
 
 Expo kini 57.0.30 dalam SDK 57, dengan override UUID terbatas pada perkakas Xcode yang sudah diuji. Audit **44 → 37**; tujuh Moderate tertutup, dua akar High tanpa patch resmi masih tersisa. [Bukti dan batas remediasi](docs/REMEDIASI-KEAMANAN.md).
+
+## Versi demo pada main
+
+Branch `main` memuat snapshot fitur terbaru yang digabungkan dengan tetap mempertahankan riwayat. Verifikasi rilis memakai build/TypeScript dan fixture/mock lokal; tidak membuat transaksi nyata atau mengubah data operasional. Jalankan demo dengan konfigurasi lokal dan Midtrans Sandbox existing. Pengujian perangkat HP, printer fisik dan pembayaran provider langsung tidak diklaim lulus dari pengujian ini. WIP lokal tetap terpisah dari versi GitHub.
