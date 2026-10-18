@@ -44,3 +44,9 @@ yarn-error.*
 
 AGENTS.md
 CLAUDE.md
+
+# Arsip dan backup lokal tidak dipublikasikan.
+*.dump
+*.backup
+*.zip
+backups/

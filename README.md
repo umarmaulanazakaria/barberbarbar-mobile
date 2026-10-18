@@ -1,75 +1,73 @@
-# BARBER BARBAR — Mobile Staff
+# BARBER BARBAR — React Native Staff
 
-Aplikasi Android untuk ADMIN dan STAFF barbershop, menggunakan backend pusat BARBER BARBAR. Aplikasi mengelola operasional harian tanpa backend atau database terpisah.
+Aplikasi operasional ADMIN/STAFF berbasis Expo SDK 57, React Native 0.86 dan React 19. Backend dan database tetap berada di repository Admin/Backend.
 
-Project untuk **tugas kuliah, pembelajaran Fullstack, portofolio, dan demonstrasi lokal**; bukan aplikasi Production. Hosting berbayar bukan kebutuhan demo. Mobile berhasil menurut laporan pengguna (**USER-REPORTED**); bukti rinci UI native/checkout Android belum lengkap. Email nyata, refund historis dan advisory tetap dicatat jujur. Lihat [acceptance demo](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/DEMO-ACCEPTANCE.md).
+## Arsitektur
 
-## Teknologi dan fitur
+Tiga aplikasi memakai satu API Express/Prisma dan PostgreSQL yang sama. Admin memakai desain **Admin Minimal**, Customer memakai **mobile-first**, Staff memakai **Minimal V3**. Harga, slot, kelayakan Member, keputusan operasional dan pembayaran ditetapkan backend. Socket.IO hanya memberi sinyal refetch REST.
 
-React Native 0.86, Expo SDK 57, React 19, TypeScript, React Navigation, Axios, SecureStore, Zustand, dan Socket.IO.
+- [Admin Web dan Backend](https://github.com/umarmaulanazakaria/barberbarbar/tree/feature/project5-integration)
+- [React Native Staff](https://github.com/umarmaulanazakaria/barberbarbar-mobile/tree/feature/project5-integration)
+- [Customer Web](https://github.com/umarmaulanazakaria/barberbarbar-customer/tree/feat/project5-react-web-mobile-first)
 
-- Login operator dan penyimpanan sesi melalui SecureStore.
-- Pelanggan, booking, walk-in, penentuan barber, check-in, dan proses layanan.
-- Pembayaran kasir, status pelunasan, membership, dan pengajuan sesuai peran.
-- Realtime serta refetch ketika aplikasi kembali aktif.
-- Keputusan khusus ADMIN tetap diperiksa backend; hak STAFF terbatas.
+## Fitur dan desain Minimal V3
+
+- Beranda ringkas dengan KPI backend, antrean Booking/Walk-in, perhatian dan kartu slim.
+- Pesanan: Semua/Aktif/Selesai, pencarian, filter bawah, pagination dan detail.
+- Walk-in Reguler/Member, pencarian profil existing, barber opsional, quote resmi, footer total dan konfirmasi idempotent. Pembuatan profil baru dilakukan ADMIN.
+- Riwayat berkelompok tanggal penutupan WIB, filter periode/jenis/status/pembayaran, pemilih tanggal native dan Muat lainnya.
+- Verifikasi Kartu Member + KTP tanpa mengetik ulang identitas; backend memeriksa kelayakan dan menyimpan audit.
+- Detail/tindakan, check-in, penugasan barber, layanan, Tunai/Transfer/QRIS, invoice/struk.
+- Login JWT operator dengan SecureStore, refetch realtime, foreground dan reconnect. Lima menu bottom navigation tetap dipertahankan.
+
+## Struktur
 
 ```text
-App.tsx / index.ts       Entry aplikasi
-src/layar/              Layar operasional
-src/komponen/           Komponen bersama
-src/layanan/            HTTP dan integrasi backend
-src/                    Navigasi, sesi, tipe, dan utilitas
-assets/                 Identitas visual dan ikon Expo
-scripts/                Pengujian integrasi
-docs/                   Panduan historis dan bukti audit
+src/staff/          Layar operasional Minimal V3
+src/layar/          Layar existing dan workflow detail
+src/layanan/        HTTP dan realtime
+src/penyimpanan/    SecureStore
+src/store/         Sesi aplikasi
+src/komponen/      Komponen bersama
+scripts/           Integrasi teknis
+docs/              Audit dan panduan
 ```
 
-## Instalasi dan konfigurasi lokal
+## Instalasi dan konfigurasi
 
-Gunakan Node.js/npm sesuai lockfile (baseline Node 24) dan backend Project 3 yang aktif. Dari folder repository:
+Gunakan Node/npm dan lockfile repository. Pada clone baru:
 
 ```powershell
 npm.cmd ci
+# Buat .env lokal lalu jalankan:
+npm.cmd start
 ```
-
-Buat `.env` lokal dengan variabel publik berikut. Ganti placeholder dengan IP LAN komputer backend saat ini:
 
 ```dotenv
-EXPO_PUBLIC_API_URL=http://<IP-LAN-KOMPUTER>:3000
+EXPO_PUBLIC_API_URL=http://IP_LAN_BACKEND:3000
 ```
 
-File `.env` diabaikan Git. Variabel `EXPO_PUBLIC_*` masuk bundle; jangan mengisinya dengan JWT, password, atau key Midtrans. Socket memakai origin backend yang sama. Pada HP, `localhost` menunjuk HP sendiri.
+Ganti placeholder dengan IP komputer saat ini. HP dan komputer harus dapat terhubung; localhost pada HP menunjuk HP sendiri. Variabel ini publik, jangan isi credential. Backend harus aktif, origin/jaringan sesuai dan operator sudah dibuat melalui alur resmi. Tidak menyediakan password contoh. Gunakan development build/Expo Go yang mendukung SDK dan modul native yang terpasang; dukungan perangkat harus diverifikasi.
 
-```powershell
-npm.cmd start -- --lan --port 8081
-```
+## Workflow
 
-Hubungkan HP dan komputer ke LAN yang sama, izinkan akses backend sesuai kebijakan firewall, lalu pindai QR dengan Expo Go yang mendukung SDK 57. Jika Expo Go tidak kompatibel, gunakan development build sesuai SDK setelah menyiapkan toolchain Android. Instalasi toolchain tidak dilakukan otomatis. Restart Metro setelah perubahan environment.
+Booking Customer masuk melalui backend yang sama. Reguler memerlukan DP sah, Member memerlukan kelayakan dan pemeriksaan fisik. Staff melanjutkan check-in, barber final, layanan dan selesai; pembayaran/invoice selalu berasal dari backend. Walk-in memakai quote terbaru dan UUID yang sama saat recovery. Realtime meminta REST ulang, bukan mengubah status pembayaran secara lokal.
 
-## Pengujian
+## Pemeriksaan
 
 ```powershell
 node node_modules/typescript/bin/tsc --noEmit
-npx.cmd expo install --check
 npx.cmd expo export --platform android --output-dir dist
-node scripts/test-integrasi-mobile.mjs
 ```
 
-Regresi backend dan browser lintas proyek tersedia di runner Project 3 dengan database lokal dan fixture terisolasi. Ekspor Hermes membuktikan bundling Android; login, UI, jaringan, dan kasir pada HP tetap memerlukan acceptance nyata. Output `dist`, `.expo`, cache, dan environment lokal tidak dilacak Git.
+Audit terbaru: TypeScript dan export Android/Hermes snapshot commit lulus. Ini bukan build APK terpasang atau pengujian perangkat. Script integrasi lama jangan dijalankan pada database operasional; gunakan runner fixture terisolasi.
 
-## Integrasi dan batas rilis
+## Batas verifikasi
 
-- [Web Management + Backend](https://github.com/umarmaulanazakaria/barberbarbar): autentikasi, booking, pembayaran, invoice, scheduler, dan event.
-- [Mobile Staff](https://github.com/umarmaulanazakaria/barberbarbar-mobile): operasional ADMIN/STAFF.
-- [Customer App](https://github.com/umarmaulanazakaria/barberbarbar-customer): pemesanan dan status milik customer.
+Audit 18 Oktober 2026 memisahkan snapshot commit dari WIP lokal. TypeScript / build bukan bukti seluruh alur UI atau pembayaran provider. Lihat [laporan audit pusat](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/audit/AUDIT-SISTEM-TERKINI.md). Pengujian integrasi memakai PostgreSQL fixture dan provider mock; bukan settlement Sandbox baru. Perangkat Android/iOS dan printer fisik belum diuji dalam audit ini. Advisory dependency masih terbuka. **Belum siap dinyatakan rilis penuh; bukan Production.**
 
-Checkout Sandbox langsung dari Customer App, refund historis Rp2.000, pengiriman recovery email, advisory dependency, dan sebagian keputusan bisnis belum tuntas. Ekosistem belum siap Production. Bukti dan penundaan dipertahankan dalam [audit](docs/audit/F14-AUDIT.md).
+[Catatan operasional dan desain](docs/OPERASIONAL-TERKINI.md). Dokumentasi lama di docs dipertahankan sebagai arsip, bukan bukti verifikasi UI terbaru.
 
-## Demonstrasi dan portofolio
+## Pembaruan keamanan dependency
 
-[Menjalankan ekosistem](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/PANDUAN-JALANKAN-DEMO.md) | [Presentasi](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/PANDUAN-PRESENTASI.md) | [Naskah](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/NASKAH-DEMO.md) | [Review Git/PR](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/PORTFOLIO-RELEASE-REVIEW.md).
-
-### Screenshot perangkat
-
-Belum ada screenshot native terverifikasi dalam repository. [Panduan capture](docs/screenshots/README.md) menentukan layar yang diperlukan. Tidak memakai screenshot Web atau gambar fiktif sebagai pengganti Android.
+Expo kini 57.0.30 dalam SDK 57, dengan override UUID terbatas pada perkakas Xcode yang sudah diuji. Audit **44 → 37**; tujuh Moderate tertutup, dua akar High tanpa patch resmi masih tersisa. [Bukti dan batas remediasi](docs/REMEDIASI-KEAMANAN.md).
