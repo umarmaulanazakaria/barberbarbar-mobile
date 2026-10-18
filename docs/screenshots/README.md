@@ -1,8 +1,8 @@
 # Capture Staff Minimal V3 pada perangkat asli
 
-Status 18 Oktober 2026: **0 screenshot native terverifikasi**. ADB tidak menemukan perangkat; daftar emulator/AVD kosong. Screenshot Web bukan pengganti screenshot React Native.
+Status 18 Oktober 2026: galeri [enam visual presentasi hasil olahan](../showcase/README.md) sudah tersedia. Materi tersebut bukan screenshot native mentah atau bukti pengujian perangkat. Pemeriksaan perangkat sebelumnya belum menemukan perangkat/AVD; tidak mengulang pengujian perangkat pada tugas dokumentasi ini. Beranda belum tersedia, Profil belum dipublikasikan karena privasi.
 
-## Lima gambar yang perlu disediakan
+## Screenshot perangkat asli tanpa edit yang masih perlu dilengkapi
 
 | Berkas yang disarankan | Layar |
 | --- | --- |
@@ -16,4 +16,4 @@ Jalankan versi main pada HP/emulator Android yang kompatibel dengan Expo SDK 57;
 
 Ambil gambar dari perangkat, misalnya melalui tombol screenshot Android atau `adb exec-out screencap -p` dengan redirection biner yang sesuai. Catat tanggal, SHA build, model/perangkat tanpa serial, resolusi dan asal data. Simpan PNG/JPEG yang terbaca; target JPEG di bawah 400 KB bila memungkinkan. Periksa gambar satu per satu sebelum menambahkannya ke README.
 
-Galeri hanya boleh disebut lengkap setelah kelima file asli tersedia dan ditinjau.
+Bukti native tanpa edit hanya boleh disebut lengkap setelah kelima file asli tersedia dan ditinjau. Galeri presentasi hasil olahan tetap diberi label terpisah.

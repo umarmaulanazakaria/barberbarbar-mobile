@@ -12,29 +12,26 @@ Operasional barbershop yang ringkas: kedatangan, pelayanan, pembayaran dan riway
 
 </div>
 
-## Bukti visual Android
+## Galeri Staff Mobile Minimal V3
 
-**Screenshot Android terbaru belum tersedia.** Pemeriksaan 18 Oktober 2026 tidak menemukan perangkat ADB tersambung atau emulator/AVD. Tidak ada gambar Web, desain konsep atau mockup yang dipakai untuk menggantikan bukti native.
+> Visual presentasi berdasarkan screenshot BARBER BARBAR Staff Mobile. Identitas dan contoh data telah diedit untuk kebutuhan portofolio; beberapa konten dapat berbeda dari data aplikasi aktual.
 
-| Layar Minimal V3 yang perlu diambil | Yang ditampilkan |
-| --- | --- |
-| Beranda | KPI, antrean dan kartu operasional ringkas. |
-| Pesanan | Daftar dan filter pesanan aktual. |
-| Walk-in | Alur Reguler/Member dan ringkasan quote. |
-| Riwayat | Pengelompokan tanggal WIB dan filter. |
-| Profil | Profil operator tanpa credential atau data pribadi tambahan. |
+<table>
+<tr><td align="center" valign="top" width="33%"><a href="docs/showcase/staff/pesanan.jpg"><img src="docs/showcase/staff/pesanan.jpg" alt="Visual presentasi olahan Staff: Pesanan" width="240" /></a><br/><strong>Pesanan</strong><br/>Booking dan walk-in dalam daftar operasional.</td>
+<td align="center" valign="top" width="33%"><a href="docs/showcase/staff/walkin-reguler.jpg"><img src="docs/showcase/staff/walkin-reguler.jpg" alt="Visual presentasi olahan Staff: Walk-in Reguler" width="240" /></a><br/><strong>Walk-in Reguler</strong><br/>Form kunjungan Reguler dan pilihan layanan contoh.</td>
+<td align="center" valign="top" width="33%"><a href="docs/showcase/staff/riwayat.jpg"><img src="docs/showcase/staff/riwayat.jpg" alt="Visual presentasi olahan Staff: Riwayat Semua" width="240" /></a><br/><strong>Riwayat Semua</strong><br/>Arsip pesanan menurut waktu penutupan WIB.</td></tr>
+<tr><td align="center" valign="top" width="33%"><a href="docs/showcase/staff/walkin-member.jpg"><img src="docs/showcase/staff/walkin-member.jpg" alt="Visual presentasi olahan Staff: Walk-in Member" width="240" /></a><br/><strong>Walk-in Member</strong><br/>Pemeriksaan Nomor Member; nomor pada visual adalah contoh.</td>
+<td align="center" valign="top" width="33%"><a href="docs/showcase/staff/riwayat-selesai.jpg"><img src="docs/showcase/staff/riwayat-selesai.jpg" alt="Visual presentasi olahan Staff: Riwayat Selesai" width="240" /></a><br/><strong>Riwayat Selesai</strong><br/>Contoh filter pesanan selesai.</td>
+<td align="center" valign="top" width="33%"><a href="docs/showcase/staff/riwayat-kosong.jpg"><img src="docs/showcase/staff/riwayat-kosong.jpg" alt="Visual presentasi olahan Staff: Riwayat kosong" width="240" /></a><br/><strong>Riwayat kosong</strong><br/>Kondisi tidak ada arsip sesuai filter.</td></tr>
+</table>
 
-[Petunjuk capture perangkat dan daftar gambar yang masih diperlukan](docs/screenshots/README.md).
+Klik gambar untuk ukuran penuh. Pada HP, geser tabel ke samping untuk melihat seluruh kolom. Seluruh gambar beresolusi 841 × 1870 dengan lebar tampilan seragam; versi JPEG dioptimalkan tanpa mengubah teks, tata letak atau dimensi.
 
-## Jelajahi sistem yang terhubung
+**Batas visual:** Beranda belum tersedia. Profil belum dipublikasikan karena email pada gambar sumber bukan domain example.com dan belum terbukti fiktif. Gambar di atas adalah materi presentasi hasil olahan, **bukan screenshot native mentah atau bukti uji perangkat/transaksi provider**. Nomor Member yang terlihat adalah contoh dari materi pengguna, bukan identitas Member operasional. Harga dan nama layanan pada gambar bukan acuan katalog aktif.
 
-Screenshot berikut berasal dari aplikasi Web pendamping, **bukan layar Staff Android**:
+[Sumber gambar, perbedaan tarif dan pilihan yang tidak dipublikasikan](docs/showcase/README.md) · [Checklist screenshot perangkat asli](docs/screenshots/README.md)
 
-| Admin Web | Customer Web mobile-first |
-| --- | --- |
-| <a href="https://github.com/umarmaulanazakaria/barberbarbar/tree/main"><img src="https://raw.githubusercontent.com/umarmaulanazakaria/barberbarbar/main/docs/showcase/dashboard.jpg" alt="Aplikasi Admin Web pendamping, bukan Android Staff" width="480" /></a> | <a href="https://github.com/umarmaulanazakaria/barberbarbar-customer/tree/main"><img src="https://raw.githubusercontent.com/umarmaulanazakaria/barberbarbar-customer/main/docs/showcase/hero.jpg" alt="Aplikasi Customer Web pendamping, bukan Android Staff" width="480" /></a> |
-
-*Data kedua gambar sintetis; bukan bukti pembayaran nyata. Galeri Staff akan diisi hanya setelah capture perangkat asli tersedia.*
+[Admin Web & Backend](https://github.com/umarmaulanazakaria/barberbarbar/tree/main) · [Customer Web mobile-first](https://github.com/umarmaulanazakaria/barberbarbar-customer/tree/main)
 
 ## Tiga aplikasi, satu backend
 
@@ -72,7 +69,7 @@ Backend harus berjalan dan akun operator dibuat melalui alur resmi. Gunakan pera
 
 ## Bukti pengujian dan batas
 
-TypeScript, pemeriksaan kompatibilitas UUID/Xcode dan ekspor **Android/Hermes** lulus saat finalisasi `main`. Ekspor bundle bukan bukti APK terpasang, interaksi perangkat, printer atau pembayaran provider nyata. Pengujian dan gambar native **belum diverifikasi pada tahap showcase ini**; advisory dependency tersisa dijelaskan di [laporan remediasi](docs/REMEDIASI-KEAMANAN.md).
+TypeScript, pemeriksaan kompatibilitas UUID/Xcode dan ekspor **Android/Hermes** lulus saat finalisasi `main`. Ekspor bundle bukan bukti APK terpasang, interaksi perangkat, printer atau pembayaran provider nyata. Pengujian perangkat dan screenshot native tanpa edit **belum diverifikasi pada tahap showcase ini**; advisory dependency tersisa dijelaskan di [laporan remediasi](docs/REMEDIASI-KEAMANAN.md).
 
 **Untuk pembelajaran, portofolio dan demo tugas magang dengan batas yang jelas.**
 

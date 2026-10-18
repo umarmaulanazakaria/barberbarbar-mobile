@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-18",
+  "provenance": "User-supplied presentation images based on Staff screenshots, already edited before this task. Not raw native captures or device-test evidence.",
+  "processing": "JPEG quality 90, original dimensions, no content changes in this task.",
+  "files": [
+    {
+      "file": "pesanan.jpg",
+      "screen": "Pesanan",
+      "sourceFile": "ChatGPT Image Oct 18, 2026, 09_50_30 PM-5.png",
+      "sourceSha256": "4b90ca4cfcfaed9846b6c48a2d36336e183ed00fe0abb92f8de71f64a701b17c",
+      "sha256": "f6a0a89dae40539a45458a50805606e6af82b5570a091a78b21078e907e0dbcb",
+      "bytes": 113264,
+      "width": 841,
+      "height": 1870
+    },
+    {
+      "file": "walkin-reguler.jpg",
+      "screen": "Walk-in Reguler",
+      "sourceFile": "ChatGPT Image Oct 18, 2026, 09_50_32 PM-6.png",
+      "sourceSha256": "336b08c4b82f84c2f21ef87a0927a880058514b90167485084d7a3446eb90c80",
+      "sha256": "87a2a98ef74c7b5646090b848dc6812f643d068edc6c078edee051e88cfbf40e",
+      "bytes": 139899,
+      "width": 841,
+      "height": 1870
+    },
+    {
+      "file": "riwayat.jpg",
+      "screen": "Riwayat Semua",
+      "sourceFile": "ChatGPT Image Oct 18, 2026, 09_50_23 PM-3.png",
+      "sourceSha256": "1e3e706f0da51c69b39ae5582a731fe24b84810ea54c9c80f12c1e63f0199233",
+      "sha256": "bad71fca2405ae9996e01809194f6222fbb71dbd97115b2077f1a07fc0d020fe",
+      "bytes": 119615,
+      "width": 841,
+      "height": 1870
+    },
+    {
+      "file": "walkin-member.jpg",
+      "screen": "Walk-in Member",
+      "sourceFile": "ChatGPT Image Oct 18, 2026, 09_50_26 PM-4.png",
+      "sourceSha256": "542d23b07c69137b664772bf1fdd586cbb21a5d9fbfeb4ea0710e502baa46c9a",
+      "sha256": "83ed9143a14753a663a398c3b93bb5f1796bd4a6dbd7eacd064c06efcf3d5e98",
+      "bytes": 141680,
+      "width": 841,
+      "height": 1870
+    },
+    {
+      "file": "riwayat-selesai.jpg",
+      "screen": "Riwayat Selesai",
+      "sourceFile": "ChatGPT Image Oct 18, 2026, 09_50_18 PM-2.png",
+      "sourceSha256": "f814f18cfc530135884d8efa16a5b922adbbfce9cfbc7662aa6a930301313382",
+      "sha256": "a7fdcdb1357d6cc70241f8628c69ac6a9360d4961c03548378781cc7e2f04b99",
+      "bytes": 124021,
+      "width": 841,
+      "height": 1870
+    },
+    {
+      "file": "riwayat-kosong.jpg",
+      "screen": "Riwayat kosong",
+      "sourceFile": "ChatGPT Image Oct 18, 2026, 09_50_07 PM-1.png",
+      "sourceSha256": "4e8be29246024a1e555993d90410880789fd98340d37aecb5408b8e68d30040e",
+      "sha256": "079253d1a6b7b1559540b5a0ff4c386e28973c24b98a2afbd36e354c5043f049",
+      "bytes": 94703,
+      "width": 841,
+      "height": 1870
+    }
+  ]
+}
