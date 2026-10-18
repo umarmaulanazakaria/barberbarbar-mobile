@@ -1,28 +1,39 @@
-import { useState } from "react";
-import { Alert, Text } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { api, ambilPesanKesalahan } from "../layanan/api";
-import { cekMemberStaff, identitasCocok, pesanStaff, tanggalStaff, type MemberStaff as DataMemberStaff, type ProfilStaff } from "./layananStaff";
-import { HalamanStaff, InputStaff, PanelStaff, PesanStaff, s, TombolStaff } from "./UiStaff";
-export type MemberTerverifikasiStaff = { member: DataMemberStaff; profil: ProfilStaff };
-export function FormMemberStaff({ nomorAwal = "", bookingId, onVerifikasi, onReset, onPerubahanBooking }: { nomorAwal?: string; bookingId?: number; onVerifikasi: (m: MemberTerverifikasiStaff) => void; onReset?: () => void; onPerubahanBooking?: () => void }) {
-  const [nomor, aturNomor] = useState(nomorAwal), [nama, aturNama] = useState(""), [hp, aturHp] = useState(""), [sibuk, aturSibuk] = useState(false), [error, aturError] = useState(""), [hasil, aturHasil] = useState<DataMemberStaff | null>(null);
-  const reset = () => { aturHasil(null); onReset?.(); };
-  const verifikasi = async () => {
-    if (sibuk) return; aturSibuk(true); aturError(""); aturHasil(null);
-    try {
-      if (!nomor.trim() || nomor.trim().length > 60 || !nama.trim() || !hp.trim()) throw Error("Isi Nomor Member, nama, dan HP pelanggan yang hadir.");
-      const m = await cekMemberStaff(nomor);
-      if (!identitasCocok(m.member, nama, hp)) throw Error("Identitas tidak cocok. Periksa bersama pelanggan; manfaat belum dapat digunakan.");
-      if (bookingId) { await api.put(`/management/membership-benefits/booking/${bookingId}`, { nomorMember: m.member.nomorMember, nama: nama.trim(), nomorTelepon: hp.trim(), hargaNormal: false, konfirmasi: true }); onPerubahanBooking?.(); }
-      aturHasil(m.member); onVerifikasi(m);
-    } catch (e) { onReset?.(); aturError(pesanStaff(e) ?? ambilPesanKesalahan(e)); } finally { aturSibuk(false); }
+import { ambilPesanKesalahan } from "../layanan/api";
+import { cekMemberStaff, pesanStaff, putuskanMemberStaff, type IdentitasMemberStaff, type KonteksIdentitasStaff } from "./layananStaff";
+import { HalamanStaff, InputStaff, PanelStaff, PesanStaff, s, TombolStaff, warnaStaff } from "./UiStaff";
+export type MemberTerverifikasiStaff = IdentitasMemberStaff & { verifikasiId: number };
+export function FormMemberStaff({ nomorAwal = "", bookingId, kunciPermintaan, onVerifikasi, onReset, onPerubahanBooking }: { nomorAwal?: string; bookingId?: number; kunciPermintaan?: string; onVerifikasi: (m: MemberTerverifikasiStaff) => void; onReset?: () => void; onPerubahanBooking?: () => void }) {
+  const [nomor, aturNomor] = useState(nomorAwal), [data, aturData] = useState<IdentitasMemberStaff | null>(null), [sibuk, aturSibuk] = useState(false), [error, aturError] = useState(""), [pesan, aturPesan] = useState("");
+  const berjalan = useRef(false), versi = useRef(0);
+  useEffect(() => {
+    if (!bookingId) return;
+    const v = ++versi.current; aturSibuk(true);
+    void cekMemberStaff(undefined, bookingId).then(d => { if (v === versi.current) aturData(d); }).catch(e => { if (v === versi.current) aturError(pesanStaff(e) ?? ambilPesanKesalahan(e)); }).finally(() => { if (v === versi.current) aturSibuk(false); });
+    return () => { versi.current++; };
+  }, [bookingId]);
+  const cari = async () => { if (berjalan.current) return; berjalan.current = true; aturSibuk(true); aturError(""); aturPesan(""); onReset?.(); try { if (!nomor.trim() || nomor.trim().length > 60) throw Error("Masukkan Nomor Member pada kartu."); aturData(await cekMemberStaff(nomor)); } catch (e) { aturData(null); aturError(pesanStaff(e) ?? ambilPesanKesalahan(e)); } finally { berjalan.current = false; aturSibuk(false); } };
+  const putuskan = async (cocok: boolean) => {
+    if (!data || berjalan.current) return; berjalan.current = true; aturSibuk(true); aturError(""); aturPesan(""); onReset?.();
+    const konteks: KonteksIdentitasStaff = bookingId ? { jenis: "BOOKING", bookingId } : kunciPermintaan ? { jenis: "WALK_IN", kunciPermintaan } : { jenis: "CEK_MEMBER" };
+    try { const hasil = await putuskanMemberStaff(konteks, data.member.nomorMember, cocok); aturData(hasil);
+      if (hasil.terverifikasi && hasil.verifikasiId) { onVerifikasi({ ...hasil, verifikasiId: hasil.verifikasiId }); aturPesan("Verifikasi identitas berhasil."); }
+      else aturPesan("Identitas tidak cocok. Manfaat Member tidak dapat digunakan. Minta bantuan Admin; jangan ubah harga Booking tanpa pemeriksaan.");
+      if (bookingId) onPerubahanBooking?.();
+    } catch (e) { aturError(pesanStaff(e) ?? ambilPesanKesalahan(e)); try { aturData(await cekMemberStaff(bookingId ? undefined : data.member.nomorMember, bookingId)); } catch { aturData(null); } }
+    finally { berjalan.current = false; aturSibuk(false); }
   };
-  const reguler = () => Alert.alert("Gunakan harga Reguler?", "Manfaat Member dilepas. Isi nama dan HP orang yang hadir. Booking dapat memerlukan DP sebelum pelayanan.", [{ text: "Batal", style: "cancel" }, { text: "Gunakan Reguler", onPress: () => { void (async () => { if (!bookingId || sibuk) return; aturSibuk(true); try { await api.put(`/management/membership-benefits/booking/${bookingId}`, { nomorMember: "", nama: nama.trim(), nomorTelepon: hp.trim(), hargaNormal: true, konfirmasi: true }); reset(); onPerubahanBooking?.(); } catch (e) { aturError(ambilPesanKesalahan(e)); } finally { aturSibuk(false); } })(); } }]);
-  return <PanelStaff><Text style={s.h2}>Verifikasi Membership</Text><Text style={[s.kecil, { marginBottom: 14 }]}>Cocokkan nama dan HP pelanggan di toko. Mendukung nomor angka dan nomor legacy, tanpa PIN atau OTP.</Text>
-    <InputStaff label="Nomor Member" nilai={nomor} nonaktif={sibuk} ubah={v => { aturNomor(v); reset(); }}/><InputStaff label="Nama pelanggan yang hadir" nilai={nama} nonaktif={sibuk} ubah={v => { aturNama(v); reset(); }}/><InputStaff label="Nomor HP pelanggan" nilai={hp} telepon nonaktif={sibuk} ubah={v => { aturHp(v); reset(); }}/><PesanStaff pesan={error}/><TombolStaff judul={sibuk ? "Memverifikasi..." : "Verifikasi Member"} nonaktif={sibuk || !nomor.trim() || !nama.trim() || !hp.trim()} aksi={() => void verifikasi()}/>
-    {hasil && <Text style={s.teks}>Member aktif · {hasil.nama}{"\n"}Berlaku hingga {hasil.berlakuSampai ? tanggalStaff(hasil.berlakuSampai) : "—"}. Manfaat layanan mengikuti pemeriksaan pesanan.</Text>}
-    {bookingId && <TombolStaff judul="Koreksi menjadi Reguler" sekunder nonaktif={sibuk || !nama.trim() || !hp.trim()} aksi={reguler}/>}
+  return <PanelStaff><Text style={s.h2}>VERIFIKASI MEMBERSHIP</Text>
+    {!data ? <>{!bookingId && <InputStaff label="Nomor Member pada kartu" nilai={nomor} nonaktif={sibuk} ubah={v => { aturNomor(v); aturPesan(""); onReset?.(); }}/>}<TombolStaff judul={sibuk ? "Memuat Member..." : "Cari Member"} nonaktif={sibuk || !bookingId && !nomor.trim()} aksi={() => { if (bookingId) { void cekMemberStaff(undefined, bookingId).then(aturData).catch(e => aturError(ambilPesanKesalahan(e))); } else void cari(); }}/></> : <>
+      <Text style={[s.teks, { marginBottom: 12 }]}>Status: <Text style={{ fontWeight: "700", color: data.member.status === "AKTIF" ? warnaStaff.ungu : warnaStaff.redup }}>{data.member.status === "AKTIF" ? "AKTIF" : data.member.status === "KEDALUWARSA" ? "KEDALUWARSA" : data.member.status === "MENUNGGU_PEMBAYARAN" ? "MENUNGGU PEMBAYARAN" : "BELUM AKTIF"}</Text></Text>
+      <Text style={s.teks}>Nomor Member: <Text style={{ fontWeight: "700" }}>{data.member.nomorMember}</Text></Text><Text style={s.teks}>Nama Member: <Text style={{ fontWeight: "700" }}>{data.member.nama}</Text></Text>
+      <View style={{ borderTopWidth: 1, borderTopColor: warnaStaff.garis, marginTop: 16, paddingTop: 16, marginBottom: 16 }}><Text style={s.label}>Pemeriksaan Identitas</Text><Text style={s.teks}>Cocokkan:</Text><Text style={s.teks}>1. Nomor Member pada kartu dengan nomor di aplikasi.</Text><Text style={s.teks}>2. Nama pada KTP dengan nama Member di aplikasi.</Text><Text style={s.teks}>3. Foto pada KTP dengan orang yang hadir.</Text></View>
+      {!data.layak && <Text style={[s.kecil, { marginBottom: 12 }]}>Membership belum memenuhi syarat untuk digunakan. Minta pemeriksaan Admin.</Text>}
+      <TombolStaff judul={sibuk ? "Memproses..." : "✓ Identitas Cocok — Verifikasi"} nonaktif={sibuk || !data.layak} aksi={() => void putuskan(true)}/><TombolStaff judul="Identitas Tidak Cocok" sekunder nonaktif={sibuk} aksi={() => void putuskan(false)}/>
+    </>}
+    <PesanStaff pesan={error}/>{!!pesan && <Text accessibilityRole="alert" style={[s.teks, { marginTop: 9 }]}>{pesan}</Text>}
   </PanelStaff>;
 }
 export default function CekMemberStaff() { const nav = useNavigation(); return <HalamanStaff judul="Cek Member" kembali={() => nav.goBack()}><FormMemberStaff onVerifikasi={() => undefined}/></HalamanStaff>; }

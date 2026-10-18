@@ -22,18 +22,11 @@ export const pesananStaff = async (id: number) => (await api.get<PesananStaff>(`
 export const uangStaff = async (id: number) => (await api.get<{ ringkasan: UangBookingStaff }>(`/bookings/${id}/payments`)).data.ringkasan;
 export const memberBookingStaff = async (id: number) => (await api.get<MemberBookingStaff>(`/management/membership-benefits/booking/${id}`)).data;
 export const profilStaff = async (cari: string) => (await api.get<ProfilStaff[]>("/management/customers/options", { params: { cari, batas: 20 } })).data;
-export const cekMemberStaff = async (nomor: string) => {
-  const list = (await api.get<{ data: MemberStaff[] }>("/management/memberships", { params: { cari: nomor.trim(), halaman: 1 } })).data.data;
-  const m = list.find(m => m.nomorMember === nomor.trim().toUpperCase());
-  if (!m) throw Error("Nomor Member tidak ditemukan.");
-  const member = (await api.get<MemberStaff>(`/management/memberships/${m.id}`)).data;
-  if (member.status !== "AKTIF" || !member.nomorTelepon) throw Error("Membership belum aktif atau tidak dapat digunakan. Periksa bersama Admin.");
-  const profil = (await profilStaff(member.nomorTelepon)).find(p => p.membership?.id === member.id);
-  if (!profil) throw Error("Profil aktif Member tidak tersedia. Hubungi Admin.");
-  return { member, profil };
-};
-export const hpStaff = (s: string) => s.replace(/[\s().+\-]/g, "").replace(/^62/, "0");
-export const identitasCocok = (m: MemberStaff, nama: string, hp: string) => m.nama.trim().toLocaleLowerCase() === nama.trim().toLocaleLowerCase() && hpStaff(m.nomorTelepon ?? "") === hpStaff(hp);
+export type KonteksIdentitasStaff = { jenis: "BOOKING"; bookingId: number } | { jenis: "WALK_IN"; kunciPermintaan: string } | { jenis: "CEK_MEMBER" };
+export type IdentitasMemberStaff = { member: { id: number; nomorMember: string; nama: string; status: string; berlakuSampai: string | null }; profil: { id: number; nama: string }; layak: boolean };
+export type HasilIdentitasMemberStaff = IdentitasMemberStaff & { terverifikasi: boolean; verifikasiId: number | null; diverifikasiPada: string | null };
+export const cekMemberStaff = async (nomorMember?: string, bookingId?: number) => (await api.get<IdentitasMemberStaff>("/management/membership-benefits/staff/member", { params: bookingId ? { bookingId } : { nomorMember: nomorMember?.trim() } })).data;
+export const putuskanMemberStaff = async (konteks: KonteksIdentitasStaff, nomorMember: string, cocok: boolean) => (await api.post<HasilIdentitasMemberStaff>("/management/membership-benefits/staff/identity", { konteks, ...(konteks.jenis !== "BOOKING" ? { nomorMember } : {}), cocok, pemeriksaanFisik: true })).data;
 export const pesanStaff = (e: unknown) => { if (e instanceof Error && !("isAxiosError" in e)) return e.message; return null; };
 export const rupiahStaff = (n: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
 export const jamStaff = (s: string) => new Intl.DateTimeFormat("id-ID", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(s));
