@@ -67,3 +67,7 @@ Audit terbaru: TypeScript dan export Android/Hermes snapshot commit lulus. Ini b
 Audit 18 Oktober 2026 memisahkan snapshot commit dari WIP lokal. TypeScript / build bukan bukti seluruh alur UI atau pembayaran provider. Lihat [laporan audit pusat](https://github.com/umarmaulanazakaria/barberbarbar/blob/feature/project5-integration/docs/audit/AUDIT-SISTEM-TERKINI.md). Pengujian integrasi memakai PostgreSQL fixture dan provider mock; bukan settlement Sandbox baru. Perangkat Android/iOS dan printer fisik belum diuji dalam audit ini. Advisory dependency masih terbuka. **Belum siap dinyatakan rilis penuh; bukan Production.**
 
 [Catatan operasional dan desain](docs/OPERASIONAL-TERKINI.md). Dokumentasi lama di docs dipertahankan sebagai arsip, bukan bukti verifikasi UI terbaru.
+
+## Pembaruan keamanan dependency
+
+Expo kini 57.0.30 dalam SDK 57, dengan override UUID terbatas pada perkakas Xcode yang sudah diuji. Audit **44 → 37**; tujuh Moderate tertutup, dua akar High tanpa patch resmi masih tersisa. [Bukti dan batas remediasi](docs/REMEDIASI-KEAMANAN.md).

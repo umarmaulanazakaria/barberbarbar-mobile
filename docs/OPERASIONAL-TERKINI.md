@@ -1,5 +1,7 @@
 # Operasional Staff dan desain terkini
 
+> Pembaruan berikutnya: audit Staff **44 → 37**, patch Expo 57.0.30 dan override UUID terbatas telah diuji. Lihat [remediasi keamanan](REMEDIASI-KEAMANAN.md). Angka dan baseline di bawah dipertahankan sebagai hasil sebelum remediasi.
+
 Snapshot audit 18 Oktober 2026, baseline b4859fc. Desain Minimal V3 tetap dipertahankan; tidak ada redesign atau perubahan source Mobile dalam audit ini.
 
 Beranda, Pesanan, Walk-in dan Riwayat berada di src/staff. Kartu slim, lima tab, panel navy/putih/ungu, filter bottom sheet dan footer Walk-in tetap mengikuti source. Detail existing, pembayaran dan struk tetap digunakan.
